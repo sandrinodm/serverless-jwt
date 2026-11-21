@@ -1,0 +1,45 @@
+name: Documentation
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.0
+        with:
+          version: 12.17.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24.0.0'
+          package-manager-cache: false
+      - run: echo "MIN_NODE_BIN=$(command -v node)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '26'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir packages/jwt-verifier exec vp pack
+      - run: pnpm docs:reference --check
+      - run: pnpm docs:packages --check
+      - name: Install integrity-checked link checker
+        env:
+          LYCHEE_INSTALL_DIR: ${{ runner.temp }}/lychee
+        run: |
+          bash scripts/lychee-install.sh
+          echo "LYCHEE_BIN=$LYCHEE_INSTALL_DIR/lychee-x86_64-unknown-linux-gnu/lychee" >> "$GITHUB_ENV"
+      - run: pnpm docs:links
+      - run: pnpm exec vp test run --config scripts/vite.config.ts docs-reference.test.mjs release-diff.test.mjs audit-dependencies.test.mjs
+      - run: pnpm build
+      - run: pnpm pack:public "$RUNNER_TEMP/docs-packages"
+      - run: pnpm docs:examples "$RUNNER_TEMP/docs-packages"
+      - name: Verify documentation checks leave checkout clean
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"

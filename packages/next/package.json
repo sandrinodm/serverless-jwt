@@ -1,47 +1,76 @@
 {
   "name": "@serverless-jwt/next",
-  "version": "0.2.1",
-  "description": "JWT verification for Next.js API Routes",
-  "author": "Sandrino Di Mattia",
-  "homepage": "https://github.com/sandrinodimattia/serverless-jwt#readme",
+  "version": "0.0.0",
+  "description": "Access-token authentication for Next.js App Router and proxy.",
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "directories": {
-    "lib": "dist"
-  },
-  "files": [
-    "dist/**"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sandrinodimattia/serverless-jwt.git"
+    "url": "git+https://github.com/sandrinodm/serverless-jwt.git",
+    "directory": "packages/next"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./pages": {
+      "source": "./src/pages.ts",
+      "default": "./dist/pages.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./pages": "./dist/pages.mjs",
+      "./package.json": "./package.json"
+    },
+    "access": "public"
   },
   "scripts": {
-    "prepublishOnly": "npm run build",
-    "prebuild": "npm run clean",
-    "build": "tsc -p tsconfig.build.json",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo && rm -rf tsconfig.build.tsbuildinfo"
-  },
-  "bugs": {
-    "url": "https://github.com/sandrinodimattia/serverless-jwt/issues"
+    "build": "vp pack",
+    "prepack": "vp pack",
+    "typecheck:lib": "tsc -p tsconfig.lib.json"
   },
   "dependencies": {
-    "@serverless-jwt/jwt-verifier": "0.2.1"
+    "@serverless-jwt/jwt-verifier": "workspace:*"
   },
   "devDependencies": {
-    "@types/next": "^9.0.0",
-    "@types/react": "^16.9.43",
-    "@types/react-dom": "^16.9.8",
-    "@types/webpack": "^4.41.21",
-    "next": "^9.4.4",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "next": "catalog:",
+    "node-mocks-http": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "sharp": "catalog:"
   },
   "peerDependencies": {
-    "next": ">=9.4.4"
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "next": "16.4.5",
+    "sharp": "0.35.5"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    },
+    "@types/react-dom": {
+      "optional": true
+    },
+    "sharp": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }

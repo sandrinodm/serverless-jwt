@@ -1,0 +1,9 @@
+# Release and security changes require review by the verified upstream maintainer.
+/.github/ @sandrinodm
+/scripts/release-* @sandrinodm
+/scripts/publish-* @sandrinodm
+/scripts/verify-published.ts @sandrinodm
+/scripts/set-version.ts @sandrinodm
+/scripts/ci-ok.ts @sandrinodm
+/scripts/package-* @sandrinodm
+/SECURITY.md @sandrinodm

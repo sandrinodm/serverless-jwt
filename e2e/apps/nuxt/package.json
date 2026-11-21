@@ -1,0 +1,24 @@
+{
+  "name": "@serverless-jwt-internal/nuxt",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "nuxt prepare && tsc -p tsconfig.json && tsc -p ../../../packages/nuxt/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/nuxt",
+    "build:app": "nuxt build",
+    "prepare:peers": "pnpm --filter @serverless-jwt/nuxt... build"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@serverless-jwt/nuxt": "workspace:*",
+    "h3": "1.15.11",
+    "nuxt": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "h3": "^1.15"
+  }
+}

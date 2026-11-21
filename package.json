@@ -1,84 +1,72 @@
 {
-  "name": "serverless-jwt",
+  "name": "serverless-jwt-monorepo",
   "private": true,
-  "version": "0.1.0",
-  "description": "JWT validation for Serverless environments",
+  "type": "module",
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "clean": "lerna run clean",
-    "build": "lerna run build",
-    "lerna:publish": "lerna publish",
-    "lerna:version": "lerna version from-git",
-    "lerna:npm": "lerna exec -- \"npm publish || exit 0\"",
-    "release": "npm run build && npm run lerna:version && npm run lerna:publish",
-    "test": "npm run lint && npm run jest",
-    "test:watch": "npm run lint && npm run jest:watch",
-    "lint": "lint-staged",
-    "jest": "jest --runInBand --coverage",
-    "jest:watch": "jest --runInBand --coverage --watch"
+    "build": "vp run -r build",
+    "check": "vp check && vp run -r typecheck:lib && jsdoc-lint && tsc -p scripts/release.tsconfig.json",
+    "lint:fix": "vp check --fix",
+    "lint:jsdoc": "jsdoc-lint",
+    "prepare": "vp config",
+    "ready": "pnpm check && vp test run",
+    "test": "vp test run",
+    "test:package": "node scripts/package-smoke.mjs",
+    "test:tooling-security": "node scripts/tooling-security.mjs",
+    "test:e2e": "vp test run --config e2e/vite.config.ts --project pr",
+    "test:e2e:nightly": "E2E_DOCKER=1 vp test run --config e2e/vite.config.ts --project nightly",
+    "api:report": "node scripts/api-report.mjs",
+    "version:set": "node scripts/set-version.ts",
+    "pack:public": "node scripts/pack-public.mjs",
+    "audit:dependencies": "node scripts/audit-dependencies.mjs",
+    "test:coverage": "vp test run --project @serverless-jwt/jwt-verifier --coverage && node scripts/coverage-check.mjs",
+    "test:mutation": "stryker run",
+    "test:runtime": "node scripts/runtime-check.mjs",
+    "test:benchmark": "vp test bench --run --config scripts/benchmark.config.mjs",
+    "test:properties:nightly": "NIGHTLY=1 vp test run --project @serverless-jwt/jwt-verifier",
+    "size": "node scripts/size.mjs",
+    "api:check": "node scripts/api-report.mjs --check",
+    "test:peers": "node scripts/peers.mjs",
+    "test:adapter-bundle": "node scripts/adapter-bundle.mjs",
+    "test:conformance:workerd": "vp test run --config packages/cloudflare/workerd.config.mjs",
+    "test:coverage:integrations": "vp test run --config scripts/integration-coverage.config.mjs --coverage",
+    "conformance:check": "node scripts/conformance-check.mjs",
+    "build:apps": "vp run -r build:app",
+    "test:e2e:release": "node scripts/e2e-release.mjs",
+    "test:e2e:runtimes": "E2E_INTEGRATION=hono vp test run --config e2e/vite.config.ts --project pr",
+    "build:e2e": "node scripts/e2e-build.mjs",
+    "test:release": "tsc -p scripts/release.tsconfig.json && vp test run scripts/release.test.mjs scripts/package-validation.test.mjs",
+    "test:release:drill": "node scripts/release-drill.ts",
+    "docs:reference": "node scripts/docs-reference.mjs",
+    "release:diff": "node scripts/release-diff.mjs",
+    "docs:examples": "node scripts/docs-examples.mjs",
+    "docs:links": "node scripts/docs-links.mjs",
+    "docs:packages": "node scripts/docs-packages.mjs"
   },
-  "author": "Sandrino Di Mattia",
-  "license": "MIT",
   "devDependencies": {
-    "@commitlint/cli": "^9.1.1",
-    "@commitlint/config-conventional": "^9.1.1",
-    "@types/jest": "26.0.5",
-    "@types/node": "14.0.24",
-    "@typescript-eslint/eslint-plugin": "^3.7.0",
-    "@typescript-eslint/parser": "^3.7.0",
-    "eslint": "^7.5.0",
-    "eslint-config-airbnb-typescript": "9.0.0",
-    "eslint-config-prettier": "6.11.0",
-    "eslint-import-resolver-typescript": "2.0.0",
-    "eslint-plugin-import": "2.22.0",
-    "eslint-plugin-jest": "23.18.0",
-    "eslint-plugin-prettier": "3.1.4",
-    "husky": "4.2.5",
-    "jest": "26.1.0",
-    "lerna": "^3.22.1",
-    "lint-staged": "10.2.11",
-    "prettier": "2.0.5",
-    "ts-jest": "26.1.3",
-    "typescript": "^3.9.7"
+    "@arethetypeswrong/cli": "catalog:",
+    "@cloudflare/vitest-plugin": "catalog:",
+    "@stryker-mutator/core": "catalog:",
+    "@stryker-mutator/vitest-runner": "catalog:",
+    "@stylistic/eslint-plugin": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "fast-check": "catalog:",
+    "jsdoc-lint": "catalog:",
+    "npm": "catalog:",
+    "publint": "catalog:",
+    "semver": "catalog:",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:",
+    "yaml": "catalog:"
   },
-  "husky": {
-    "skipCI": false,
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.17.0",
+      "onFail": "download"
     }
   },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  },
-  "jest": {
-    "globals": {
-      "ts-jest": {
-        "tsConfig": "tsconfig.json"
-      }
-    },
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "packages/*/src/*.ts"
-    ],
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "testEnvironment": "node"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "*.{js,jsx,json,yml,md}": [
-      "prettier --write"
-    ]
-  },
-  "workspaces": [
-    "packages/*",
-    "example"
-  ]
+  "engines": {
+    "node": ">=26.0.0"
+  }
 }

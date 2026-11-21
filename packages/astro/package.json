@@ -1,0 +1,95 @@
+{
+  "name": "@serverless-jwt/astro",
+  "version": "0.0.0",
+  "description": "Bearer access-token middleware and protected prerender checks for Astro.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandrinodm/serverless-jwt.git",
+    "directory": "packages/astro"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "imports": {
+    "#serverless-jwt-astro-policy": "./dist/policy.mjs"
+  },
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json",
+    "./build": {
+      "source": "./src/build.ts",
+      "default": "./dist/build.mjs"
+    },
+    "./type-repair": {
+      "source": "./src/type-repair.ts",
+      "types": "./dist/type-repair.d.mts",
+      "default": "./dist/type-repair.mjs"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./package.json": "./package.json",
+      "./build": "./dist/build.mjs",
+      "./type-repair": {
+        "types": "./dist/type-repair.d.mts",
+        "default": "./dist/type-repair.mjs"
+      }
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "prepack": "vp pack",
+    "typecheck:lib": "tsc -p tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "astro": "catalog:"
+  },
+  "peerDependencies": {
+    "@astrojs/markdown-remark": "7.3.5",
+    "@types/hast": "3.0.5",
+    "@types/mdast": "4.0.4",
+    "@types/node": "26.6.6",
+    "@types/unist": "3.0.3",
+    "astro": "7.4.5",
+    "ioredis": "5.11.1",
+    "mongodb": "7.8.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    },
+    "@astrojs/markdown-remark": {
+      "optional": true
+    },
+    "mongodb": {
+      "optional": true
+    },
+    "ioredis": {
+      "optional": true
+    },
+    "@types/unist": {
+      "optional": true
+    },
+    "@types/hast": {
+      "optional": true
+    },
+    "@types/mdast": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

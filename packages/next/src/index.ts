@@ -1,60 +1,232 @@
-import { NextApiResponse, NextApiRequest } from 'next';
-import { JwtVerifier, getTokenFromHeader } from '@serverless-jwt/jwt-verifier';
-import { NextJwtVerifierOptions, IApiRoute, NextAuthenticatedApiRequest } from './types';
+/// <reference path="./next-compat.d.ts" preserve="true" />
+/// <reference path="./sharp-compat.d.cts" preserve="true" />
+
+import type { Auth, JwtVerifierError, VerifiedClaims } from '@serverless-jwt/jwt-verifier';
+import type {
+  Decision,
+  Guard,
+  IntegrationOptions,
+  RequestInfoLike,
+} from '@serverless-jwt/jwt-verifier/adapter';
+import type { NextRequest } from 'next/server.js';
+
+import {
+  authorizationFromHeaders,
+  createGuard,
+  toResponse,
+} from '@serverless-jwt/jwt-verifier/adapter';
 
 /**
- * Middleware to validate a token and set the user context.
+ * Authentication mode controls missing-credential inference.
  */
-const validateJWT = (verifier: JwtVerifier, options: NextJwtVerifierOptions) => {
-  return (apiRoute: IApiRoute): IApiRoute => async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
-    if (!req) {
-      throw new Error('Request is not available');
-    }
+type Mode = 'required' | 'optional';
+/**
+ * Only an explicit synchronous skip grants unauthenticated access.
+ */
+type Skip = ((request: RequestInfoLike) => boolean) | undefined;
 
-    if (!res) {
-      throw new Error('Response is not available');
-    }
-
-    let claims;
-    let accessToken;
-
-    try {
-      accessToken = getTokenFromHeader(req.headers.authorization as string);
-      claims = await verifier.verifyAccessToken(accessToken);
-    } catch (err) {
-      if (typeof options.handleError !== 'undefined' && options.handleError !== null) {
-        return options.handleError(res, err);
-      }
-
-      return res.status(401).json({
-        error: err.code,
-        error_description: err.message
-      });
-    }
-
-    // Expose the identity in the client context.
-    const authenticatedRequest = req as NextAuthenticatedApiRequest;
-    authenticatedRequest.identityContext = {
-      token: accessToken as string,
-      claims: claims as Record<string, unknown>
-    };
-
-    // Continue.
-    return apiRoute(req, res);
-  };
-};
-
-export interface NextJwtVerifier {
-  (apiRoute: IApiRoute): (req: NextApiRequest, res: NextApiResponse) => Promise<void>;
+/**
+ * Next's App Router resolves dynamic route parameters asynchronously.
+ */
+export interface RouteContext {
+  /**
+   * Original framework-owned promise, forwarded without awaiting or replacing it.
+   */
+  readonly params: Promise<Readonly<Record<string, string | ReadonlyArray<string> | undefined>>>;
 }
 
 /**
- * Create a JWT verifier handler.
- * @param options
+ * Handler authentication includes only the policy's enabled missing-credential states.
  */
-export const NextJwtVerifier = (options: NextJwtVerifierOptions): NextJwtVerifier => {
-  const verifier = new JwtVerifier(options);
-  return validateJWT(verifier, options);
+export type NextAuth<TIdentity, TMode extends Mode = 'required', TSkip extends Skip = undefined> =
+  | Auth<TIdentity>
+  | (TMode extends 'optional' ? null : never)
+  | (TSkip extends undefined ? never : undefined);
+
+/**
+ * Route options own a typed awaited error hook and one module-scope verifier.
+ */
+export type NextOptions<
+  TIdentity = VerifiedClaims,
+  TContext = RouteContext,
+  TMode extends Mode = 'required',
+  TSkip extends Skip = undefined,
+> = IntegrationOptions<TIdentity> & {
+  /**
+   * Required by default; invalid tokens reject in both modes.
+   */
+  readonly mode?: TMode;
+  /**
+   * Explicitly permits unauthenticated requests, receiving the cheap request view.
+   */
+  readonly skip?: TSkip;
+  /**
+   * Custom responses should retain no-store; undefined selects the safe default.
+   */
+  readonly onError?: (
+    error: JwtVerifierError,
+    request: NextRequest,
+    context: TContext,
+  ) => Response | undefined | Promise<Response | undefined>;
 };
 
-export { claimToArray, removeNamespaces, getTokenFromHeader } from '@serverless-jwt/jwt-verifier';
+/**
+ * Route handlers retain the real NextRequest and every original route-context field.
+ */
+export type JwtRouteHandler<
+  TIdentity,
+  TContext = RouteContext,
+  TMode extends Mode = 'required',
+  TSkip extends Skip = undefined,
+> = (
+  request: NextRequest,
+  context: TContext,
+  auth: NextAuth<TIdentity, TMode, TSkip>,
+) => Response | Promise<Response>;
+
+/**
+ * Proxy hooks reject early without making authenticated state available to downstream routes.
+ */
+export type ProxyOptions<TIdentity = VerifiedClaims> = IntegrationOptions<TIdentity> & {
+  /**
+   * Undefined selects the default; failures emit the fixed integration diagnostic.
+   */
+  readonly onError?: (
+    error: JwtVerifierError,
+    request: NextRequest,
+  ) => Response | undefined | Promise<Response | undefined>;
+};
+
+/**
+ * Preserves the original Next request and cancellation signal without consuming its body.
+ */
+function decide<TIdentity, TMode extends Mode>(
+  guard: Guard<TIdentity, TMode>,
+  request: NextRequest,
+): Promise<Decision<TIdentity, TMode>> {
+  return guard.decide(
+    {
+      method: request.method,
+      url: request.url,
+      authorization: authorizationFromHeaders(request.headers),
+      header: (name: string): string | undefined => request.headers.get(name) ?? undefined,
+    },
+    request.signal,
+  );
+}
+
+/**
+ * Awaits only the rejection hook, isolating failures before returning the default response.
+ */
+async function reject<TIdentity, TMode extends Mode>(
+  guard: Guard<TIdentity, TMode>,
+  decision: Extract<Decision<TIdentity, TMode>, { readonly kind: 'reject' }>,
+  hook?: () => Response | undefined | Promise<Response | undefined>,
+): Promise<Response> {
+  if (hook) {
+    try {
+      const response = await hook();
+      if (response !== undefined) {
+        if (!(response instanceof Response) || response.bodyUsed || response.body?.locked) {
+          throw new Error('Unusable custom response');
+        }
+
+        return response;
+      }
+    } catch {
+      guard.reportErrorHookFailure();
+    }
+  }
+
+  return toResponse(decision.http);
+}
+
+/**
+ * Protects an App Router handler with an explicit skip-aware authentication argument.
+ */
+export function withJwt<
+  TIdentity = VerifiedClaims,
+  TContext = RouteContext,
+  TMode extends Mode = 'required',
+>(
+  options: NextOptions<TIdentity, TContext, TMode, (request: RequestInfoLike) => boolean> & {
+    readonly skip: (request: RequestInfoLike) => boolean;
+  },
+  handler: JwtRouteHandler<TIdentity, TContext, TMode, (request: RequestInfoLike) => boolean>,
+): (request: NextRequest, context: TContext) => Promise<Response>;
+
+/**
+ * Required-by-default handlers receive nonnullable Auth unless optional mode is selected.
+ */
+export function withJwt<
+  TIdentity = VerifiedClaims,
+  TContext = RouteContext,
+  TMode extends Mode = 'required',
+>(
+  options: NextOptions<TIdentity, TContext, TMode>,
+  handler: JwtRouteHandler<TIdentity, TContext, TMode>,
+): (request: NextRequest, context: TContext) => Promise<Response>;
+
+/**
+ * Broad pretyped policies retain all enabled states instead of promising a narrower handler.
+ */
+export function withJwt<
+  TIdentity = VerifiedClaims,
+  TContext = RouteContext,
+  TMode extends Mode = Mode,
+>(
+  options: NextOptions<TIdentity, TContext, TMode, Skip>,
+  handler: JwtRouteHandler<TIdentity, TContext, TMode, Skip>,
+): (request: NextRequest, context: TContext) => Promise<Response>;
+
+/**
+ * Constructs one verifier at module scope and calls application code outside authentication
+ * catches.
+ */
+export function withJwt<
+  TIdentity = VerifiedClaims,
+  TContext = RouteContext,
+  TMode extends Mode = Mode,
+>(
+  options: NextOptions<TIdentity, TContext, TMode, Skip>,
+  handler:
+    | JwtRouteHandler<TIdentity, TContext, TMode>
+    | JwtRouteHandler<TIdentity, TContext, TMode, Skip>,
+): (request: NextRequest, context: TContext) => Promise<Response> {
+  const guard = createGuard<TIdentity, TMode>(options);
+  const { onError } = options;
+  return async (request: NextRequest, context: TContext): Promise<Response> => {
+    const decision = await decide(guard, request);
+    if (decision.kind === 'reject') {
+      return reject(
+        guard,
+        decision,
+        onError ? () => onError(decision.error, request, context) : undefined,
+      );
+    }
+
+    return (handler as JwtRouteHandler<TIdentity, TContext, TMode, Skip>)(
+      request,
+      context,
+      (decision.kind === 'skip' ? undefined : decision.auth) as NextAuth<TIdentity, TMode, Skip>,
+    );
+  };
+}
+
+/**
+ * Rejects early from proxy.ts, returning undefined to continue; always verify again in the route.
+ */
+export function createProxyGuard<TIdentity = VerifiedClaims>(
+  options: ProxyOptions<TIdentity>,
+): (request: NextRequest) => Promise<Response | undefined> {
+  const guard = createGuard<TIdentity, Mode>(options);
+  const { onError } = options;
+  return async (request: NextRequest): Promise<Response | undefined> => {
+    const decision = await decide(guard, request);
+    if (decision.kind === 'reject') {
+      return reject(guard, decision, onError ? () => onError(decision.error, request) : undefined);
+    }
+
+    return undefined;
+  };
+}

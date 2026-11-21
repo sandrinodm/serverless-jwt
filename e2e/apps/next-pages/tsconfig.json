@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.types.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "jsx": "preserve",
+    "incremental": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "isolatedDeclarations": false
+  },
+  "include": ["next-env.d.ts", "pages", "app", "src", ".next/types/**/*.ts"]
+}

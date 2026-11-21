@@ -1,0 +1,1 @@
+{"compilerOptions": {"strict": true, "skipLibCheck": false, "noEmit": true, "module": "ESNext", "moduleResolution": "Bundler", "target": "ES2025", "lib": ["ES2025", "DOM", "DOM.Iterable"], "types": ["node"], "allowImportingTsExtensions": true}, "files": ["fidelity-platforms.ts"]}

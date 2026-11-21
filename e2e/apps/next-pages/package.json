@@ -1,0 +1,27 @@
+{
+  "name": "@serverless-jwt-internal/next-pages",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.types.json && tsc -p ../../../packages/next/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/next",
+    "build:app": "next build",
+    "prepare:peers": "pnpm --filter @serverless-jwt/next... build"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@serverless-jwt/next": "workspace:*",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "next": "16.4.5"
+  }
+}

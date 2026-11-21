@@ -1,105 +1,57 @@
-# Serverless JWT
+# serverless-jwt
 
-With the rise of [JAMstack](https://jamstack.wtf/) we've seen a lot of frameworks and platforms offer the ability to build and host Serverless functions as lightweight backends for your applications.
+[Getting started](docs/getting-started.md) · [Configuration](docs/configuration.md) · [Providers](docs/providers/README.md) · [Development](docs/development.md)
 
-In the last few years the Node.js ecosystem has provided many solutions to handle authentication in your web applications through libraries like [Passport.js](http://www.passportjs.org/) and [express-jwt](https://github.com/auth0/express-jwt/). But due to the different programming model of Serverless functions (lambdas as opposed to full blown web servers) these libraries are not the perfect tool for the job.
+Verify OAuth access tokens in serverless, edge and Node applications. One portable core uses `jose`; official framework integrations extract credentials, enforce scope policy and return safe HTTP errors. Requires Node 24+ for Node consumers; edge packages use Web APIs.
 
-This is where `serverless-jwt` comes in: a simple and lightweight solution focused at solving authentication for your Serverless functions.
+Version 1.0 is unreleased. Use locally packed packages to try it before publication. See the [release guide](docs/releasing.md).
 
-## How does this thing work?
+## Quick start
 
-### Pre-requisites
+Install `@serverless-jwt/jwt-verifier` at the exact version you intend to evaluate, then create one verifier per trust policy:
 
-This library works well with applications which integrate with an OpenID Connect provider like Auth0, Azure AD (B2C), Identity Server, Okta, ... These applications will receive an `id_token` which is used to authenticated the user and an `access_token` used to talk to APIs (in our case to Serverless functions).
+```ts
+import { createJwtVerifier, requireScopes } from '@serverless-jwt/jwt-verifier';
 
-If you have such an application, read along! We'll be adding examples over time to show how you can do this with your favourite technology stack.
-
-### Talking to Serverless functions
-
-Your React/Vue/Angular/... code will be interacting with your Serverless functions using `fetch` or any other HTTP client. These calls will need to be made by providing the access token as part of the `Authorization` header:
-
-```bash
-Authorization: Bearer <access_token>
-```
-
-Here's an example:
-
-```js
-const callApi = async (path) => {
-  try {
-    setResponse('Loading...');
-
-    const token = await getAccessTokenFromSomewhere();
-
-    const api = await fetch('/.netlify/functions' + path, {
-      headers: {
-        authorization: 'Bearer ' + token
-      }
-    });
-
-    const body = await api.json();
-    setResponse({
-      status: api.status,
-      statusText: api.statusText,
-      body
-    });
-  } catch (e) {
-    setResponse(e.message);
-  }
-};
-```
-
-### Securing your Serverless functions
-
-Finally, this is where `serverless-jwt` comes in. You'll want to secure your functions to make sure only authorized calls can execute the function.
-
-You'll create a verifier in which you simply define the `issuer` (your OpenID Connect provider) and the `audience` (which identifies your own API). The library will use the discovery endpoints exposed by your OpenID Connect provider to load everything that is needed to validate incoming tokens.
-
-If the request is authorized the Serverless function will be executed, otherwise an error will be returned to the client.
-
-```js
-import { NextJwtVerifier } from '@serverless-jwt/next';
-
-const jwt = NextJwtVerifier({
-  issuer: 'https://sandrino-dev.auth0.com/',
-  audience: 'urn:worldmappers'
+const verifier = createJwtVerifier({
+  issuer: 'https://issuer.example.com/',
+  audience: 'https://api.example.com',
+  algorithms: ['RS256'],
+  mapClaims: (claims) => ({ userId: claims.sub }),
 });
 
-// Example Next.js API Route
-const MyInvoices = async (req, res) => {
-  // Claims contains the user's ID and any other information available about the user.
-  const { claims } = req.identityContext;
-
-  // Use the current user to filter data and apply other business logic.
-  const invoices = db.invoices.get((i) => i.userId === claims.sub);
-  res.json({
-    invoices
-  });
-};
-
-export default jwt(MyInvoices);
+const auth = await verifier.verify(accessToken);
+requireScopes(auth, ['read:orders']);
+const userId = auth.identity.userId;
+const signedSubject = auth.claims.sub;
 ```
 
-## Integrations
+For HTTP routes, choose an integration below. [Test locally](docs/examples/verify-locally/README.md) with a loopback issuer before connecting a provider.
 
-### Netlify Functions
+## Official integrations
 
-[@serverless-jwt/netlify](./packages/netlify)
+| Package                                                               | Framework or platform                           |
+| --------------------------------------------------------------------- | ----------------------------------------------- |
+| [`@serverless-jwt/cloudflare`](packages/cloudflare/README.md)         | Workers and Pages Functions                     |
+| [`@serverless-jwt/aws-lambda`](packages/aws-lambda/README.md)         | Lambda handler wrappers                         |
+| [`@serverless-jwt/vercel`](packages/vercel/README.md)                 | Vercel Functions                                |
+| [`@serverless-jwt/netlify`](packages/netlify/README.md)               | Functions v2; Edge and transitional v1 subpaths |
+| [`@serverless-jwt/next`](packages/next/README.md)                     | App Router; Pages subpath                       |
+| [`@serverless-jwt/express`](packages/express/README.md)               | Express middleware                              |
+| [`@serverless-jwt/fastify`](packages/fastify/README.md)               | Fastify plugin                                  |
+| [`@serverless-jwt/hono`](packages/hono/README.md)                     | Hono middleware                                 |
+| [`@serverless-jwt/sveltekit`](packages/sveltekit/README.md)           | SvelteKit hooks and build registration          |
+| [`@serverless-jwt/astro`](packages/astro/README.md)                   | Astro middleware                                |
+| [`@serverless-jwt/nuxt`](packages/nuxt/README.md)                     | Nuxt/H3 middleware; h3-v2 subpath               |
+| [`@serverless-jwt/tanstack-start`](packages/tanstack-start/README.md) | TanStack React Start and Solid Start            |
+| [`@serverless-jwt/react-router`](packages/react-router/README.md)     | React Router                                    |
 
-Examples:
+[Compatibility](docs/compatibility.md) records exact tested environments and remaining limitations. Netlify v1 support is transitional and deprecated from day one; prefer Functions v2. Astro strict TypeScript support requires the documented [SDK declaration repair](docs/astro-sdk-repair.md) after dependency installation.
 
-- [Gatsby & Netlify Functions using Auth0](./examples/gatsby-auth0-netlify-functions)
+## Security model
 
-### Next.js
+Pin the issuer, an API audience distinct from ID-token audiences, and allowed asymmetric algorithms. The generic profile is the default; opt into RFC 9068 only when the provider issues that token product. [Provider guides](docs/providers/README.md) describe safe configurations and explicitly unverified cases, including shared-audience ZITADEL tokens.
 
-[@serverless-jwt/next](./packages/next)
+Expiration is required. Discovery and JWKS endpoints require HTTPS except explicit local loopback development. Key outages return 503 and Retry-After; stale keys are disabled by default. Every verifier owns its cache. Signed claims remain immutable and separate from mapped identity; scope checks use signed claims. Library code never logs or includes token contents in errors.
 
-Examples:
-
-- [Securing Next.js API Routes using Auth0](./examples/nextjs-auth0)
-
-## OpenID Connect Providers
-
-This library will work with any OpenID Connect Provider. Documentation for certain providers is available here:
-
-- [Auth0](./docs/oidc-providers/auth0)
+Read [keys and outages](docs/keys-and-outages.md), [scopes and claims](docs/scopes-and-claims.md), the [threat model](docs/security/threat-model.md) and the package README before deployment. This library verifies API access tokens; it does not implement login, sessions, refresh flows, introspection, DPoP or Lambda authorizers.

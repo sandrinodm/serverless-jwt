@@ -1,0 +1,23 @@
+{
+  "name": "@serverless-jwt-internal/aws-lambda",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.json && tsc -p ../../../packages/aws-lambda/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/aws-lambda",
+    "prepare:peers": "pnpm --filter @serverless-jwt/aws-lambda... build"
+  },
+  "dependencies": {
+    "@serverless-jwt/aws-lambda": "workspace:*",
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@types/aws-lambda": "catalog:"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "@types/aws-lambda": "^8.10.164"
+  }
+}

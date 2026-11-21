@@ -1,0 +1,54 @@
+{
+  "name": "@serverless-jwt/fastify",
+  "version": "0.0.0",
+  "description": "Bearer access-token integration for fastify.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandrinodm/serverless-jwt.git",
+    "directory": "packages/fastify"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./package.json": "./package.json"
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "prepack": "vp pack",
+    "typecheck:lib": "tsc -p tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "fastify-plugin": "catalog:"
+  },
+  "devDependencies": {
+    "fastify": "catalog:"
+  },
+  "peerDependencies": {
+    "@types/node": "^24 || ^26",
+    "fastify": "^5"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

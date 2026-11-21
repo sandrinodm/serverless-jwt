@@ -1,0 +1,18 @@
+[
+  {
+    "package": "@solidjs/router",
+    "version": "1.0.1",
+    "file": "dist/components.d.ts",
+    "patch": "@solidjs__router@1.0.1.patch",
+    "originalSha256": "1afafde6fd4a461112ec5b07f14282879305ee7b87a668d742fcf3ccb528180d",
+    "patchedSha256": "59e2b9419815c5e2f98ad7b96e00981ce504014db8afbe60a634b09680278a97"
+  },
+  {
+    "package": "h3",
+    "version": "2.0.8",
+    "file": "dist/h3.d.mts",
+    "patch": "h3@2.0.8.patch",
+    "originalSha256": "60c886d7cbd7930c3e33478cc72bb8723ff7f9943364eee6e2e562421f75ac9c",
+    "patchedSha256": "3423406341a8b64f3b9ab2880798e482bd2725826788ab4ade8eb5777f479896"
+  }
+]

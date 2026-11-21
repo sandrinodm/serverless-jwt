@@ -1,88 +1,161 @@
-import { JwtVerifier, JwtVerifierOptions, getTokenFromHeader, JwtVerifierError } from '@serverless-jwt/jwt-verifier';
+import type { Context } from '@netlify/functions';
+import type { Auth, JwtVerifierError, VerifiedClaims } from '@serverless-jwt/jwt-verifier';
+import type { IntegrationOptions, RequestInfoLike } from '@serverless-jwt/jwt-verifier/adapter';
 
-interface Event {
-  headers: Record<string, unknown>;
-}
-
-interface NetlifyJwtVerifier {
-  (handler: any): (event: Event, context: any, cb: any) => Promise<any>;
-}
-
-interface NetlifyJwtVerifierOptions extends JwtVerifierOptions {
-  /**
-   * Customize how errors are handled.
-   */
-  handleError?(err: Error | JwtVerifierError): Record<string, unknown>;
-}
-
-export interface IdentityContext {
-  /**
-   * The token that was provided.
-   */
-  token: string;
-
-  /**
-   * Claims for the authenticated user.
-   */
-  claims: Record<string, unknown>;
-}
+import {
+  authorizationFromHeaders,
+  createGuard,
+  toResponse,
+} from '@serverless-jwt/jwt-verifier/adapter';
 
 /**
- * Return a JSON response.
- * @param statusCode
- * @param body
+ * Missing-credential policy controls handler auth inference.
  */
-const json = (statusCode: number, body: Record<string, unknown>) => {
-  return {
-    statusCode,
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  };
+type Mode = 'required' | 'optional';
+/**
+ * Only an explicit synchronous skip permits unauthenticated access.
+ */
+type Skip = ((request: RequestInfoLike) => boolean) | undefined;
+
+/**
+ * Authentication states enabled by this factory's mode and skip policy.
+ */
+export type NetlifyAuth<
+  TIdentity,
+  TMode extends Mode = 'required',
+  TSkip extends Skip = undefined,
+> =
+  | Auth<TIdentity>
+  | (TMode extends 'optional' ? null : never)
+  | (TSkip extends undefined ? never : undefined);
+
+/**
+ * Web-function policy preserves a platform-owned platform second context argument.
+ */
+export type NetlifyOptions<
+  TIdentity = VerifiedClaims,
+  TContext extends Context = Context,
+  TMode extends Mode = 'required',
+  TSkip extends Skip = undefined,
+> = IntegrationOptions<TIdentity> & {
+  /**
+   * Required by default; invalid tokens reject in either mode.
+   */
+  readonly mode?: TMode;
+  /**
+   * Deliberately permits unauthenticated requests, supplying undefined auth.
+   */
+  readonly skip?: TSkip;
+  /**
+   * Undefined selects the default; custom responses should retain no-store.
+   */
+  readonly onError?: (
+    error: JwtVerifierError,
+    request: Request,
+    context: TContext,
+  ) => Response | undefined | Promise<Response | undefined>;
 };
 
 /**
- * Middleware to validate a token and set the user context.
+ * Auth always occupies the third callback slot, without modifying the platform context.
  */
-const validateJWT = (verifier: JwtVerifier, options: NetlifyJwtVerifierOptions) => {
-  return (handler: any) => async (event: Event, context: any, cb: any) => {
-    let claims;
-    let accessToken;
+export type JwtNetlifyHandler<
+  TIdentity,
+  TContext extends Context = Context,
+  TMode extends Mode = 'required',
+  TSkip extends Skip = undefined,
+> = (
+  request: Request,
+  context: TContext,
+  auth: NetlifyAuth<TIdentity, TMode, TSkip>,
+) => Response | Promise<Response>;
 
-    try {
-      accessToken = getTokenFromHeader(event.headers.authorization as string);
-      claims = await verifier.verifyAccessToken(accessToken);
-    } catch (err) {
-      if (typeof options.handleError !== 'undefined' && options.handleError !== null) {
-        return options.handleError(err);
+/**
+ * Explicit-skip handlers admit undefined auth.
+ */
+export function withJwt<
+  TIdentity = VerifiedClaims,
+  TContext extends Context = Context,
+  TMode extends Mode = 'required',
+>(
+  options: NetlifyOptions<TIdentity, TContext, TMode, (request: RequestInfoLike) => boolean> & {
+    readonly skip: (request: RequestInfoLike) => boolean;
+  },
+  handler: JwtNetlifyHandler<TIdentity, TContext, TMode, (request: RequestInfoLike) => boolean>,
+): (request: Request, context: TContext) => Promise<Response>;
+
+/**
+ * Required-by-default handlers preserve nonnullable mapped identity.
+ */
+export function withJwt<
+  TIdentity = VerifiedClaims,
+  TContext extends Context = Context,
+  TMode extends Mode = 'required',
+>(
+  options: NetlifyOptions<TIdentity, TContext, TMode>,
+  handler: JwtNetlifyHandler<TIdentity, TContext, TMode>,
+): (request: Request, context: TContext) => Promise<Response>;
+
+/**
+ * Pretyped policies keep all declared optional and skip states.
+ */
+export function withJwt<
+  TIdentity = VerifiedClaims,
+  TContext extends Context = Context,
+  TMode extends Mode = Mode,
+>(
+  options: NetlifyOptions<TIdentity, TContext, TMode, Skip>,
+  handler: JwtNetlifyHandler<TIdentity, TContext, TMode, Skip>,
+): (request: Request, context: TContext) => Promise<Response>;
+
+/**
+ * Creates one verifier at module scope and invokes application code outside authentication catches.
+ */
+export function withJwt<
+  TIdentity = VerifiedClaims,
+  TContext extends Context = Context,
+  TMode extends Mode = Mode,
+>(
+  options: NetlifyOptions<TIdentity, TContext, TMode, Skip>,
+  handler:
+    | JwtNetlifyHandler<TIdentity, TContext, TMode>
+    | JwtNetlifyHandler<TIdentity, TContext, TMode, Skip>,
+): (request: Request, context: TContext) => Promise<Response> {
+  const guard = createGuard<TIdentity, TMode>(options);
+  const { onError } = options;
+  return async (request: Request, context: TContext): Promise<Response> => {
+    const decision = await guard.decide(
+      {
+        method: request.method,
+        url: request.url,
+        authorization: authorizationFromHeaders(request.headers),
+        header: (name: string): string | undefined => request.headers.get(name) ?? undefined,
+      },
+      request.signal,
+    );
+    if (decision.kind === 'reject') {
+      if (onError) {
+        try {
+          const response = await onError(decision.error, request, context);
+          if (response !== undefined) {
+            if (!(response instanceof Response) || response.bodyUsed || response.body?.locked) {
+              throw new Error('Unusable custom response');
+            }
+
+            return response;
+          }
+        } catch {
+          guard.reportErrorHookFailure();
+        }
       }
 
-      return json(401, {
-        error: err.code,
-        error_description: err.message
-      });
+      return toResponse(decision.http);
     }
 
-    // Expose the identity in the client context.
-    const ctx: IdentityContext = {
-      token: accessToken,
-      claims
-    };
-    context.identityContext = ctx;
-
-    // Continue.
-    return handler(event, context, cb);
+    return (handler as JwtNetlifyHandler<TIdentity, TContext, TMode, Skip>)(
+      request,
+      context,
+      (decision.kind === 'skip' ? undefined : decision.auth) as NetlifyAuth<TIdentity, TMode, Skip>,
+    );
   };
-};
-
-/**
- * Create a JWT verifier handler.
- * @param options
- */
-export const NetlifyJwtVerifier = (options: NetlifyJwtVerifierOptions): NetlifyJwtVerifier => {
-  const verifier = new JwtVerifier(options);
-  return validateJWT(verifier, options);
-};
-
-export { claimToArray, removeNamespaces, getTokenFromHeader } from '@serverless-jwt/jwt-verifier';
+}

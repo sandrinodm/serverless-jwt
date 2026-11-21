@@ -1,25 +1,487 @@
+name: CI
 on:
   push:
     branches:
       - master
   pull_request:
-
-name: ci
-
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+  schedule:
+    - cron: 17 3 * * *
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  test:
+  check:
+    name: Check and package
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [10, 12, 14]
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 12.17.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 26
+          cache: pnpm
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        id: minimum-node
+        with:
+          node-version: 24.0.0
+      - run: echo "MIN_NODE_BIN=$(command -v node)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir packages/jwt-verifier exec vp pack
+      - run: pnpm build
+      - run: pnpm build:apps
+      - name: Format, lint, types and documentation checks
+        run: pnpm check
+      - run: pnpm test
+      - run: pnpm test:release
+      - run: pnpm test:conformance:workerd
+      - run: pnpm conformance:check
+      - name: Upload conformance capability results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: conformance
+          path: |
+            reports/conformance/*.json
+            reports/conformance-workerd/*.json
+            reports/conformance-all.json
+          if-no-files-found: error
+      - run: pnpm test:coverage
+      - run: pnpm test:coverage:integrations
+      - name: Keep coverage evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: coverage
+          path: coverage/**/*.json
+          if-no-files-found: error
+      - name: Validate Conventional Commit PR title
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: node scripts/pr-title.ts
+      - run: pnpm audit:dependencies
+      - name: Build and pack the npm package
+        run: pnpm pack:public "$RUNNER_TEMP/tarballs"
+      - run: pnpm size
+      - run: pnpm test:adapter-bundle
+      - run: pnpm api:check
+      - run: pnpm test:benchmark
+      - name: Install exact Deno for packed Edge checks
+        working-directory: ${{ runner.temp }}
+        run: >
+          node "$GITHUB_WORKSPACE/node_modules/npm/bin/npm-cli.js" install --prefix
+          "$RUNNER_TEMP/package-runtime-tools" --ignore-scripts --no-audit --no-fund
+          --before="$(date -u -d '7 days ago' +%FT%TZ)" @deno/linux-x64-glibc@2.9.6
+
+          echo "DENO_BIN=$RUNNER_TEMP/package-runtime-tools/node_modules/@deno/linux-x64-glibc/deno"
+          >> "$GITHUB_ENV"
+      - name: Test the installed package
+        run: pnpm test:package "$RUNNER_TEMP/tarballs"
+      - name: Verify checks leave the checkout clean
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+  core-node:
+    name: Whole core unit suite (Node ${{ matrix.node }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: 24.0.0
+          - os: ubuntu-latest
+            node: '24'
+          - os: ubuntu-latest
+            node: '26'
+          - os: macos-latest
+            node: '26'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: ${{ matrix.node }}
-      - run: node --version
-      - run: npm install
-      - run: npm run bootstrap
-      - run: npm test
+      - run: echo "UNIT_NODE_BIN=$(command -v node)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 12.17.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir packages/jwt-verifier exec vp pack
+      - run: '"$UNIT_NODE_BIN" node_modules/vite-plus/bin/vp test run --project
+          @serverless-jwt/jwt-verifier'
+      - name: Verify checks leave the checkout clean
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+  core-portable:
+    name: Portable HTTPS suite (${{ matrix.runtime }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime:
+          - workerd
+          - deno
+          - bun
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 12.17.0
+      - run: pnpm install --frozen-lockfile
+      - name: Install exact portable runtime binaries without lifecycle scripts
+        if: matrix.runtime != 'workerd'
+        working-directory: ${{ runner.temp }}
+        run: >
+          node "$GITHUB_WORKSPACE/node_modules/npm/bin/npm-cli.js" install --prefix
+          "$RUNNER_TEMP/runtime-tools" --ignore-scripts --no-audit --no-fund --before="$(date -u -d
+          '7 days ago' +%FT%TZ)" @deno/linux-x64-glibc@2.9.6 @oven/bun-linux-x64@1.4.4
+
+          echo "DENO_BIN=$RUNNER_TEMP/runtime-tools/node_modules/@deno/linux-x64-glibc/deno" >>
+          "$GITHUB_ENV"
+
+          echo "BUN_BIN=$RUNNER_TEMP/runtime-tools/node_modules/@oven/bun-linux-x64/bin/bun" >>
+          "$GITHUB_ENV"
+      - run: pnpm test:runtime ${{ matrix.runtime }}
+      - name: Verify checks leave the checkout clean
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+  core-nightly:
+    name: Security, performance and framework development gates
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 12.17.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir packages/jwt-verifier exec vp pack
+      - run: pnpm test:properties:nightly
+      - run: pnpm test:mutation
+      - run: NIGHTLY=1 pnpm test:benchmark
+      - run: pnpm build
+      - name: Install exact Deno for packed Edge checks
+        working-directory: ${{ runner.temp }}
+        run: >
+          node "$GITHUB_WORKSPACE/node_modules/npm/bin/npm-cli.js" install --prefix
+          "$RUNNER_TEMP/package-runtime-tools" --ignore-scripts --no-audit --no-fund
+          --before="$(date -u -d '7 days ago' +%FT%TZ)" @deno/linux-x64-glibc@2.9.6
+
+          echo "DENO_BIN=$RUNNER_TEMP/package-runtime-tools/node_modules/@deno/linux-x64-glibc/deno"
+          >> "$GITHUB_ENV"
+      - run: pnpm --dir e2e/apps/tanstack-start test:response
+      - run: pnpm build:apps
+      - run: pnpm --dir e2e/apps/sveltekit build:cloudflare
+      - name: Verify checks leave the checkout clean
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+  peers:
+    name: Peer range (${{ matrix.integration }}, ${{ matrix.end }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        end:
+          - min
+          - max
+        integration:
+          - reference-express
+          - cloudflare
+          - next
+          - hono
+          - vercel
+          - netlify
+          - sveltekit
+          - astro
+          - react-router
+          - tanstack-start
+          - express
+          - fastify
+          - aws-lambda
+          - next-pages
+          - netlify-v1
+          - nuxt
+          - nuxt-h3-v2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 12.17.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:peers ${{ matrix.integration }} ${{ matrix.end }}
+      - name: Upload actual peer resolutions
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: peers-${{ matrix.integration }}-${{ matrix.end }}
+          path: reports/peers/*.json
+          if-no-files-found: error
+      - name: Verify checkout remains unchanged
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+  e2e-pr:
+    strategy:
+      fail-fast: false
+      matrix:
+        integration:
+          - reference-express
+          - cloudflare
+          - next
+          - hono
+          - vercel
+          - netlify
+          - sveltekit
+          - astro
+          - react-router
+          - tanstack-start
+          - express
+          - fastify
+          - aws-lambda
+          - nuxt
+    env:
+      E2E_INTEGRATION: ${{ matrix.integration }}
+    name: Real HTTPS issuers and framework HTTP contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 12.17.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.0.0
+      - run: echo "MIN_NODE_BIN=$(command -v node)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install exact cross-runtime HTTP test hosts
+        working-directory: ${{ runner.temp }}
+        run: >
+          node "$GITHUB_WORKSPACE/node_modules/npm/bin/npm-cli.js" install --prefix
+          "$RUNNER_TEMP/e2e-runtime-tools" --ignore-scripts --no-audit --no-fund --before="$(date -u
+          -d '7 days ago' +%FT%TZ)" @deno/linux-x64-glibc@2.9.6 @oven/bun-linux-x64@1.4.4
+
+          echo "DENO_BIN=$RUNNER_TEMP/e2e-runtime-tools/node_modules/@deno/linux-x64-glibc/deno" >>
+          "$GITHUB_ENV"
+
+          echo "BUN_BIN=$RUNNER_TEMP/e2e-runtime-tools/node_modules/@oven/bun-linux-x64/bin/bun" >>
+          "$GITHUB_ENV"
+      - run: pnpm --dir packages/jwt-verifier exec vp pack
+      - run: pnpm build
+      - run: pnpm build:e2e
+      - run: pnpm test:e2e
+      - name: Upload redacted server logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: e2e-pr-evidence-${{ matrix.integration }}
+          path: |
+            reports/e2e/*.log
+            reports/conformance-e2e/*.json
+          if-no-files-found: error
+      - name: Verify checkout remains unchanged
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+
+  docs:
+    uses: $/.github/workflows/docs.yml
+
+  zizmor:
+    uses: $/.github/workflows/zizmor.yml
+  dependency-review:
+    uses: $/.github/workflows/dependency-review.yml
+  codeql:
+    permissions:
+      contents: read
+      security-events: write
+    uses: $/.github/workflows/codeql.yml
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs:
+      - check
+      - docs
+      - core-node
+      - core-portable
+      - core-nightly
+      - peers
+      - e2e-pr
+      - zizmor
+      - dependency-review
+      - codeql
+      - e2e-runtimes
+      - e2e-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+          package-manager-cache: false
+      - env:
+          CI_NEEDS: ${{ toJSON(needs) }}
+        run: node scripts/ci-ok.ts
+  e2e-runtimes:
+    name: Actual Hono and minimum core runtime (${{ matrix.runtime }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime:
+          - bun
+          - deno
+          - workerd
+          - node-minimum
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 12.17.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.0.0
+      - run: echo "MIN_NODE_BIN=$(command -v node)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install exact eligible native runtime tools
+        working-directory: ${{ runner.temp }}
+        run: >
+          node "$GITHUB_WORKSPACE/node_modules/npm/bin/npm-cli.js" install --prefix
+          "$RUNNER_TEMP/e2e-runtime-tools" --ignore-scripts --no-audit --no-fund --before="$(date -u
+          -d '7 days ago' +%FT%TZ)" @deno/linux-x64-glibc@2.9.6 @oven/bun-linux-x64@1.4.4
+
+          echo "DENO_BIN=$RUNNER_TEMP/e2e-runtime-tools/node_modules/@deno/linux-x64-glibc/deno" >>
+          "$GITHUB_ENV"
+
+          echo "BUN_BIN=$RUNNER_TEMP/e2e-runtime-tools/node_modules/@oven/bun-linux-x64/bin/bun" >>
+          "$GITHUB_ENV"
+      - run: pnpm --dir packages/jwt-verifier exec vp pack
+      - run: pnpm build
+      - run: pnpm --dir e2e/apps/hono build:app
+      - name: Actual cross-runtime integration HTTP suite
+        if: matrix.runtime != 'node-minimum'
         env:
-          CI: true
+          E2E_RUNTIME: ${{ matrix.runtime }}
+        run: pnpm test:e2e:runtimes
+      - name: Complete core on exact minimum Node
+        if: matrix.runtime == 'node-minimum'
+        run: '"$MIN_NODE_BIN" node_modules/vite-plus/bin/vp test run --project @serverless-jwt/jwt-verifier'
+      - name: Upload redacted evidence only
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: e2e-runtime-${{ matrix.runtime }}
+          path: |
+            reports/e2e/*.log
+            reports/e2e/*.json
+            reports/e2e-matrix/*.json
+            reports/e2e-release/*.json
+          if-no-files-found: warn
+  e2e-release:
+    name: Exact tarball HTTP capability matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 12.17.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.0.0
+      - run: echo "MIN_NODE_BIN=$(command -v node)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install exact eligible native runtime tools
+        working-directory: ${{ runner.temp }}
+        run: >
+          node "$GITHUB_WORKSPACE/node_modules/npm/bin/npm-cli.js" install --prefix
+          "$RUNNER_TEMP/e2e-runtime-tools" --ignore-scripts --no-audit --no-fund --before="$(date -u
+          -d '7 days ago' +%FT%TZ)" @deno/linux-x64-glibc@2.9.6 @oven/bun-linux-x64@1.4.4
+
+          echo "DENO_BIN=$RUNNER_TEMP/e2e-runtime-tools/node_modules/@deno/linux-x64-glibc/deno" >>
+          "$GITHUB_ENV"
+
+          echo "BUN_BIN=$RUNNER_TEMP/e2e-runtime-tools/node_modules/@oven/bun-linux-x64/bin/bun" >>
+          "$GITHUB_ENV"
+      - run: pnpm --dir packages/jwt-verifier exec vp pack
+      - run: pnpm build
+      - run: pnpm pack:public "$RUNNER_TEMP/e2e-tarballs"
+      - run: pnpm test:e2e:release "$RUNNER_TEMP/e2e-tarballs"
+      - name: Upload redacted evidence only
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: e2e-release
+          path: |
+            reports/e2e/*.log
+            reports/e2e/*.json
+            reports/e2e-matrix/*.json
+            reports/e2e-release/*.json
+          if-no-files-found: error

@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2025", "ESNext.Disposable", "DOM", "DOM.Iterable"],
+    "isolatedDeclarations": false,
+    "typeRoots": ["./node_modules/@types"]
+  },
+  "include": ["api", "src"]
+}

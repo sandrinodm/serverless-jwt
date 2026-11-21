@@ -1,5 +1,8 @@
 {
-  "extends": "../../tsconfig.json",
-  "exclude": ["node_modules", "dist"],
-  "include": ["src", "test"]
+  "extends": "./tsconfig.lib.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src", "vite.config.ts"],
+  "exclude": []
 }

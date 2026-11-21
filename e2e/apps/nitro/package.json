@@ -1,0 +1,19 @@
+{
+  "name": "@serverless-jwt-internal/nitro",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.json",
+    "build:app": "nitro build && pnpm test:types"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@serverless-jwt/nuxt": "workspace:*",
+    "h3": "1.15.11",
+    "nitropack": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

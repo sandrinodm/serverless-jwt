@@ -1,0 +1,33 @@
+{
+  "name": "@serverless-jwt-internal/astro",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:app": "node build.mjs",
+    "test:types": "pnpm repair:types && astro sync && tsc -p tsconfig.json && tsc -p ../../../packages/astro/tsconfig.types.json",
+    "typecheck:lib": "pnpm prepare:peers && pnpm test:types",
+    "prepare:peers": "pnpm --filter @serverless-jwt/astro... build",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/astro --project @serverless-jwt-internal/astro",
+    "repair:types": "node --input-type=module -e \"import { repairAstroTypes } from '@serverless-jwt/astro/type-repair'; repairAstroTypes({ installationRoot: '../../..' })\""
+  },
+  "dependencies": {
+    "@serverless-jwt/astro": "workspace:*"
+  },
+  "devDependencies": {
+    "@astrojs/markdown-remark": "catalog:",
+    "@astrojs/node": "catalog:",
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@types/hast": "catalog:",
+    "@types/mdast": "catalog:",
+    "@types/node": "catalog:",
+    "@types/unist": "catalog:",
+    "astro": "catalog:",
+    "ioredis": "catalog:",
+    "mongodb": "catalog:",
+    "supports-color": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "astro": "7.4.5"
+  }
+}

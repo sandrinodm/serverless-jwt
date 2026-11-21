@@ -1,0 +1,22 @@
+{
+  "name": "@serverless-jwt-internal/fastify",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.json && tsc -p ../../../packages/fastify/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/fastify",
+    "prepare:peers": "pnpm --filter @serverless-jwt/fastify... build"
+  },
+  "dependencies": {
+    "@serverless-jwt/fastify": "workspace:*",
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "fastify": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "fastify": "^5"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2025", "ESNext.Disposable", "DOM", "DOM.Iterable"],
+    "types": ["node", "astro/client"]
+  },
+  "include": ["src/**/*.ts", ".astro/types.d.ts"]
+}

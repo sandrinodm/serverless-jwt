@@ -1,0 +1,16 @@
+{
+  "name": "@serverless-jwt-internal/e2e-harness",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@serverless-jwt/aws-lambda": "workspace:*",
+    "@serverless-jwt/testkit": "workspace:*",
+    "@testcontainers/toxiproxy": "catalog:",
+    "jose": "catalog:",
+    "oidc-provider": "catalog:",
+    "testcontainers": "catalog:"
+  },
+  "devDependencies": {
+    "@types/oidc-provider": "catalog:"
+  }
+}

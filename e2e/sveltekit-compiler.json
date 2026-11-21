@@ -1,0 +1,11 @@
+{
+  "apiPeer": {
+    "version": "6.0.3",
+    "published": "2026-04-16T23:38:27.905Z",
+    "integrity": "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==",
+    "tarball": "https://registry.npmjs.org/typescript/-/typescript-6.0.3.tgz"
+  },
+  "compilerAlias": "typescript-native",
+  "compilerVersion": "7.0.2",
+  "purpose": "Satisfy the native SDK optional TypeScript6 API peer under normal npm resolution; execute every native app type check with the explicit TS7 alias binary, preserving strict options and no compiler fallback."
+}

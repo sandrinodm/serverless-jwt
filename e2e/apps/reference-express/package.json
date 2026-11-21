@@ -1,0 +1,19 @@
+{
+  "name": "@serverless-jwt-internal/reference-express",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.json",
+    "test:conformance": "vp test run --config vite.config.ts"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "express": "catalog:"
+  },
+  "devDependencies": {
+    "@types/express": "catalog:"
+  },
+  "peerDependencies": {
+    "express": ">=5.0.0 <6"
+  }
+}

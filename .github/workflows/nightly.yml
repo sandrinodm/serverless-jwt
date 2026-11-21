@@ -1,0 +1,216 @@
+name: Nightly security and integration checks
+on:
+  schedule:
+    - cron: 43 3 * * *
+  workflow_dispatch: null
+  pull_request:
+    branches:
+      - master
+    paths:
+      - e2e/images.json
+permissions:
+  contents: read
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  nightly:
+    name: Nightly security and native integration checks (standard runner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 12.17.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+          cache: pnpm
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.0.0
+      - run: echo "MIN_NODE_BIN=$(command -v node)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir packages/jwt-verifier exec vp pack
+      - run: pnpm test:properties:nightly
+      - run: pnpm test:mutation
+      - run: NIGHTLY=1 pnpm test:benchmark
+      - run: pnpm audit:dependencies
+      - run: pnpm build
+      - run: pnpm pack:public "$RUNNER_TEMP/packages"
+      - run: pnpm size
+      - name: Install exact eligible native runtime tools
+        working-directory: ${{ runner.temp }}
+        run: >
+          node "$GITHUB_WORKSPACE/node_modules/npm/bin/npm-cli.js" install --prefix
+          "$RUNNER_TEMP/e2e-runtime-tools" --ignore-scripts --no-audit --no-fund --before="$(date -u
+          -d '7 days ago' +%FT%TZ)" @deno/linux-x64-glibc@2.9.6 @oven/bun-linux-x64@1.4.4
+
+          echo "DENO_BIN=$RUNNER_TEMP/e2e-runtime-tools/node_modules/@deno/linux-x64-glibc/deno" >>
+          "$GITHUB_ENV"
+
+          echo "BUN_BIN=$RUNNER_TEMP/e2e-runtime-tools/node_modules/@oven/bun-linux-x64/bin/bun" >>
+          "$GITHUB_ENV"
+      - name: Install exact local AWS emulator control tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/e2e-aws-tools"
+          "$RUNNER_TEMP/e2e-aws-tools/bin/pip" install aws-sam-cli==1.171.0 boto3==1.43.108
+          echo "E2E_PYTHON=$RUNNER_TEMP/e2e-aws-tools/bin/python" >> "$GITHUB_ENV"
+      - name: Pull only immutable eligible images
+        run: >
+          node --input-type=module <<'NODE'
+
+          import { readFileSync } from 'node:fs';
+
+          import { execFileSync } from 'node:child_process';
+
+          const { images } = JSON.parse(readFileSync('e2e/images.json'));
+
+          for (const { image } of Object.values(images)) execFileSync('docker', ['pull', image], {
+          stdio: 'inherit' });
+
+          NODE
+      - run: pnpm build:e2e
+      - run: pnpm --dir e2e/apps/sveltekit build:cloudflare
+      - run: pnpm test:e2e:nightly
+        env:
+          E2E_NIGHTLY_SCOPE: standard
+      - name: Verify checks leave checkout clean
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Upload redacted evidence only
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: e2e-nightly
+          path: |
+            reports/e2e/*.log
+            reports/e2e/*.json
+            reports/e2e-matrix/*.json
+            reports/e2e-release/*.json
+          if-no-files-found: error
+    env:
+      E2E_DOCKER: '1'
+  floci200-native:
+    name: Run Floci200 isolation on a larger runner
+    if: vars.FLOCI_NIGHTLY_RUNNER_GROUP != '' && vars.FLOCI_NIGHTLY_RUNNER != ''
+    runs-on:
+      group: ${{ vars.FLOCI_NIGHTLY_RUNNER_GROUP }}
+      labels: ${{ vars.FLOCI_NIGHTLY_RUNNER }}
+    timeout-minutes: 30
+    steps:
+      - name: Require a configured GitHub-hosted larger runner
+        env:
+          RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: |
+          if [ "$RUNNER_ENVIRONMENT" != github-hosted ]; then
+            echo '::error::Floci200 requires a GitHub-hosted larger runner.'
+            exit 1
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Require native nightly runner capacity
+        run: node scripts/nightly-capacity.mjs
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+        with:
+          version: 12.17.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '26'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir packages/jwt-verifier exec vp pack
+      - run: pnpm --dir packages/aws-lambda build
+      - name: Install exact local Floci control tools
+        run: |
+          python3 -m venv "$RUNNER_TEMP/e2e-aws-tools"
+          "$RUNNER_TEMP/e2e-aws-tools/bin/pip" install boto3==1.43.108
+          echo "E2E_PYTHON=$RUNNER_TEMP/e2e-aws-tools/bin/python" >> "$GITHUB_ENV"
+      - name: Pull only immutable eligible Floci and support images
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const { images } = JSON.parse(readFileSync('e2e/images.json'));
+          for (const name of ['floci', 'lambda', 'toxiproxy', 'ryuk', 'sshd']) {
+            execFileSync('docker', ['pull', images[name].image], { stdio: 'inherit' });
+          }
+          NODE
+      - run: pnpm test:e2e:nightly
+        id: floci-tests
+        env:
+          E2E_NIGHTLY_SCOPE: floci200
+      - name: Verify checks leave checkout clean
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Upload redacted Floci200 evidence
+        if: always() && (steps.floci-tests.outcome == 'success' || steps.floci-tests.outcome == 'failure')
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: floci200-nightly
+          path: |
+            reports/e2e/*.log
+            reports/e2e/*.json
+            reports/e2e-matrix/*.json
+          if-no-files-found: error
+  floci200:
+    name: Floci200 isolation required
+    needs: floci200-native
+    if: always()
+    runs-on: ubuntu-latest
+    permissions: {}
+    timeout-minutes: 5
+    steps:
+      - name: Require complete Floci200 evidence
+        env:
+          FLOCI_NIGHTLY_RUNNER_GROUP: ${{ vars.FLOCI_NIGHTLY_RUNNER_GROUP }}
+          FLOCI_NIGHTLY_RUNNER: ${{ vars.FLOCI_NIGHTLY_RUNNER }}
+          FLOCI_RESULT: ${{ needs.floci200-native.result }}
+        run: |
+          if [ -z "$FLOCI_NIGHTLY_RUNNER_GROUP" ] || [ -z "$FLOCI_NIGHTLY_RUNNER" ]; then
+            echo '::error::Floci200 has not run. Configure FLOCI_NIGHTLY_RUNNER_GROUP and FLOCI_NIGHTLY_RUNNER for an eligible GitHub-hosted larger runner.'
+            exit 1
+          fi
+          if [ "$FLOCI_RESULT" != success ]; then
+            echo '::error::Floci200 isolation did not pass. Inspect the native job and its evidence.'
+            exit 1
+          fi
+  report:
+    needs: [nightly, floci200]
+    if: always() && github.event_name == 'schedule' && (needs.nightly.result != 'success' || needs.floci200.result != 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Create or update one nightly failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+          body="$RUNNER_TEMP/nightly-failure.md"
+
+          printf 'Scheduled security/integration checks failed. Inspect the redacted evidence and
+          failed job: %s\n' "$url" > "$body"
+
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search '"Nightly
+          security and integration checks failed" in:title' --json number --jq '.[0].number //
+          empty')
+
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --repo "$GITHUB_REPOSITORY" --body-file "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title 'Nightly security and integration checks failed' --body-file "$body"
+          fi

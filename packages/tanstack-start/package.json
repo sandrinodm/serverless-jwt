@@ -1,0 +1,78 @@
+{
+  "name": "@serverless-jwt/tanstack-start",
+  "version": "0.0.0",
+  "description": "Compiler-safe bearer middleware callbacks for TanStack React and Solid Start.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandrinodm/serverless-jwt.git",
+    "directory": "packages/tanstack-start"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./package.json": "./package.json"
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "prepack": "vp pack",
+    "typecheck:lib": "tsc -p tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*"
+  },
+  "devDependencies": {
+    "@tanstack/react-start": "catalog:",
+    "@tanstack/solid-start": "catalog:",
+    "@tanstack/start-client-core": "catalog:",
+    "@tanstack/start-server-core": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "solid-js": "catalog:",
+    "srvx": "catalog:"
+  },
+  "peerDependencies": {
+    "@tanstack/react-start": "1.169.4",
+    "@tanstack/solid-start": "1.169.4",
+    "@tanstack/start-client-core": "1.170.39",
+    "@tanstack/start-server-core": "1.169.45",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/react-start": {
+      "optional": true
+    },
+    "@tanstack/solid-start": {
+      "optional": true
+    },
+    "@types/node": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    },
+    "@types/react-dom": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

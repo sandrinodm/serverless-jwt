@@ -1,0 +1,50 @@
+import ts from 'typescript';
+import {readFileSync,writeFileSync} from 'node:fs';
+export function trim(source,roots,destination){
+ const text=readFileSync(source,'utf8');const sf=ts.createSourceFile(source,text,ts.ScriptTarget.Latest,true);
+ const byName=new Map();
+ for(const s of sf.statements){
+  const names=s.name&&ts.isIdentifier(s.name)?[s.name.text]:ts.isVariableStatement(s)?s.declarationList.declarations.map(d=>d.name.getText(sf)):[];
+  for(const name of names)byName.set(name,[...(byName.get(name)||[]),s]);
+ }
+ const included=new Set();
+ function visitName(name){for(const decl of byName.get(name)||[]){if(included.has(decl))continue;included.add(decl);function walk(n){if(ts.isIdentifier(n))visitName(n.text);ts.forEachChild(n,walk);}ts.forEachChild(decl,walk);}}
+ for(const root of roots)visitName(root);
+ const body=sf.statements.filter(s=>included.has(s)).map(s=>s.getText(sf)).join('\n');
+ const imports=[];
+ for(const s of sf.statements.filter(ts.isImportDeclaration)){
+  const c=s.importClause;if(!c)continue;
+  const binding=c.namedBindings;
+  const names=[...(c.name?[c.name.text]:[]),...(binding?ts.isNamedImports(binding)?binding.elements.map(n=>n.name.text):[binding.name.text]:[])];
+  if(names.some(n=>new RegExp('\\b'+n+'\\b').test(body)))imports.push(s.getText(sf));
+ }
+ const missing=roots.filter(r=>!(byName.get(r)||[]).some(d=>d.modifiers?.some(m=>m.kind===ts.SyntaxKind.ExportKeyword)));
+ writeFileSync(destination,imports.join('\n')+'\n'+body+'\n'+(missing.length?'export type { '+missing.join(', ')+' };\n':''));
+}
+trim('node_modules/@deno/kv/esm/npm.d.ts',['openKv','KvImplementation'],'deno-api.d.ts');
+// This module reexports Kv from the exact leaf used by openKv.
+writeFileSync('deno-api.d.ts',readFileSync('deno-api.d.ts','utf8')+'\nexport type { Kv } from "./node_modules/@deno/kv/esm/kv_types.js";\n');
+trim('node_modules/@netlify/blobs/dist/main.d.ts',['GetDeployStoreOptions','GetStoreOptions'],'netlify-options.d.ts');
+{
+ const source='node_modules/uploadthing/dist/types-Bs3w2d_3.d.ts';
+ const program=ts.createProgram([source],{strict:true,moduleResolution:ts.ModuleResolutionKind.Bundler,module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ESNext});
+ const checker=program.getTypeChecker();const sf=program.getSourceFile(source);
+ let sourceText=sf.text;
+ const decl=sf.statements.find(s=>s.name?.text==='UTApiOptions');
+ for(const field of [...decl.members].reverse()){
+  if(!['logFormat','logLevel'].includes(field.name?.text))continue;
+  const type=checker.getTypeAtLocation(field.type);
+  const expanded=checker.typeToString(type,undefined,ts.TypeFormatFlags.NoTruncation|ts.TypeFormatFlags.InTypeAlias);
+  sourceText=sourceText.slice(0,field.type.pos)+expanded+sourceText.slice(field.type.end);
+ }
+ writeFileSync('uploadthing-expanded.d.ts',sourceText);
+ trim('uploadthing-expanded.d.ts',['UTApiOptions'],'uploadthing-options.d.ts');
+} 
+trim('node_modules/@cloudflare/workers-types/index.d.ts',['KVNamespace','R2Bucket'],'cloudflare-input.d.ts');
+const deno=readFileSync('node_modules/@types/deno/index.d.ts','utf8');
+const sf=ts.createSourceFile('deno.d.ts',deno,ts.ScriptTarget.Latest,true);
+const bodies=sf.statements.filter(n=>ts.isModuleDeclaration(n)&&n.name.text==='Deno'&&ts.isModuleBlock(n.body)).map(n=>n.body.statements.map(s=>s.getText(sf)).join('\n')).join('\n').replace(/\bDeno\./g,'');
+writeFileSync('deno-input-all.d.ts',bodies);
+trim('deno-input-all.d.ts',['Kv'],'deno-input.d.ts');
+trim('node_modules/@uploadthing/shared/dist/index.d.ts',['FetchEsque'],'fetch-options.d.ts');
+writeFileSync('uploadthing-options.d.ts',readFileSync('uploadthing-options.d.ts','utf8').replace(/^import .*?from "@uploadthing\/shared";/m,'import type { FetchEsque } from "./fetch-options.js";'));

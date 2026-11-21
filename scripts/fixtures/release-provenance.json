@@ -1,0 +1,21 @@
+{
+  "source": "https://registry.npmjs.org/-/npm/v1/attestations/vite-plus@1.5.0",
+  "recorded": "2026-11-11",
+  "attestations": [
+    {
+      "predicateType": "https://slsa.dev/provenance/v1",
+      "bundle": {
+        "dsseEnvelope": {
+          "payload": "eyJfdHlwZSI6Imh0dHBzOi8vaW4tdG90by5pby9TdGF0ZW1lbnQvdjEiLCJzdWJqZWN0IjpbeyJuYW1lIjoicGtnOm5wbS92aXRlLXBsdXNAMS41LjAiLCJkaWdlc3QiOnsic2hhNTEyIjoiZTBjMjMyOGY2NjhiN2JlOWY4YzA2OWUzM2ViZGUwZTdhOWM1ZDdhZTFhNjQ1NzFkZjk0MjUwZTc0ODY5MjdjZjJiMjZmZTg0NjExNDQwNjkxZTAwNDIxOGJkYjM3ZGFlMGY1NGUyMzRmYWFmMjllZGY3MmE1YzY2YWJiMDVlM2EifX1dLCJwcmVkaWNhdGVUeXBlIjoiaHR0cHM6Ly9zbHNhLmRldi9wcm92ZW5hbmNlL3YxIiwicHJlZGljYXRlIjp7ImJ1aWxkRGVmaW5pdGlvbiI6eyJidWlsZFR5cGUiOiJodHRwczovL3Nsc2EtZnJhbWV3b3JrLmdpdGh1Yi5pby9naXRodWItYWN0aW9ucy1idWlsZHR5cGVzL3dvcmtmbG93L3YxIiwiZXh0ZXJuYWxQYXJhbWV0ZXJzIjp7IndvcmtmbG93Ijp7InJlZiI6InJlZnMvaGVhZHMvbWFpbiIsInJlcG9zaXRvcnkiOiJodHRwczovL2dpdGh1Yi5jb20vdm9pZHplcm8tZGV2L3ZpdGUtcGx1cyIsInBhdGgiOiIuZ2l0aHViL3dvcmtmbG93cy9yZWxlYXNlLnltbCJ9fSwiaW50ZXJuYWxQYXJhbWV0ZXJzIjp7ImdpdGh1YiI6eyJldmVudF9uYW1lIjoicHVzaCIsInJlcG9zaXRvcnlfaWQiOiI5NDM5MDE5ODgiLCJyZXBvc2l0b3J5X293bmVyX2lkIjoiMTQ5NzUwNTgxIn19LCJyZXNvbHZlZERlcGVuZGVuY2llcyI6W3sidXJpIjoiZ2l0K2h0dHBzOi8vZ2l0aHViLmNvbS92b2lkemVyby1kZXYvdml0ZS1wbHVzQHJlZnMvaGVhZHMvbWFpbiIsImRpZ2VzdCI6eyJnaXRDb21taXQiOiI2NzFiNWU0NmUyMjhhNDUzNDZkZDgyZmYxYjE1MTdjMzczMDQzNWE3In19XX0sInJ1bkRldGFpbHMiOnsiYnVpbGRlciI6eyJpZCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9hY3Rpb25zL3J1bm5lci9naXRodWItaG9zdGVkIn0sIm1ldGFkYXRhIjp7Imludm9jYXRpb25JZCI6Imh0dHBzOi8vZ2l0aHViLmNvbS92b2lkemVyby1kZXYvdml0ZS1wbHVzL2FjdGlvbnMvcnVucy80MTc3MDU4Nzk2NC9hdHRlbXB0cy8xIn19fX0=",
+          "payloadType": "application/vnd.in-toto+json",
+          "signatures": [
+            {
+              "sig": "MEYCIQDhSikQj8/qu/k5D2dqUnvJuBkmX1j8rDXGDKzG0PsC9wIhAIb9j5aqMa0Ta6pbM89GlJqRHY/qcN7HFgrUTDg1TJhe",
+              "keyid": ""
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

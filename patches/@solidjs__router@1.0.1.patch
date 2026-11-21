@@ -1,0 +1,14 @@
+diff --git a/dist/components.d.ts b/dist/components.d.ts
+--- a/dist/components.d.ts
++++ b/dist/components.d.ts
+@@ -4,8 +4,8 @@
+     namespace JSX {
+         interface AnchorHTMLAttributes<T> {
+             state?: string;
+-            noScroll?: boolean;
+-            replace?: boolean;
++            noScroll?: boolean | undefined;
++            replace?: boolean | undefined;
+             preload?: boolean;
+             link?: boolean;
+         }

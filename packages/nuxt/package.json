@@ -1,0 +1,64 @@
+{
+  "name": "@serverless-jwt/nuxt",
+  "version": "0.0.0",
+  "description": "Bearer access-token integration for nuxt.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandrinodm/serverless-jwt.git",
+    "directory": "packages/nuxt"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./h3-v2": {
+      "source": "./src/h3-v2.ts",
+      "default": "./dist/h3-v2.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./h3-v2": "./dist/h3-v2.mjs",
+      "./package.json": "./package.json"
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "prepack": "vp pack",
+    "typecheck:lib": "tsc -p tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*"
+  },
+  "devDependencies": {
+    "crossws": "catalog:",
+    "h3": "npm:h3@1.15.11",
+    "h3-v2": "npm:h3@2.0.8"
+  },
+  "peerDependencies": {
+    "@types/node": "^24 || ^26",
+    "crossws": "0.4.17",
+    "h3": "^1.15 || ^2.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    },
+    "crossws": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

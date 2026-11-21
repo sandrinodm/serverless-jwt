@@ -1,0 +1,22 @@
+{
+  "name": "@serverless-jwt-internal/hono",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.json && tsc -p ../../../packages/hono/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/hono",
+    "build:app": "node build.mjs"
+  },
+  "dependencies": {
+    "@hono/node-server": "catalog:",
+    "@serverless-jwt/hono": "workspace:*",
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "hono": "catalog:"
+  },
+  "devDependencies": {
+    "wrangler": "catalog:"
+  },
+  "peerDependencies": {
+    "hono": "4.13.16"
+  }
+}

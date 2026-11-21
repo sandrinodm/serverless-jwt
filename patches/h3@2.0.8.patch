@@ -1,0 +1,31 @@
+diff --git a/dist/h3.d.mts b/dist/h3.d.mts
+--- a/dist/h3.d.mts
++++ b/dist/h3.d.mts
+@@ -566,7 +566,7 @@
+    *
+    * **TIP:** Use `message` for longer error descriptions in JSON body.
+    */
+-  statusText?: string;
++  statusText?: string | undefined;
+   /**
+    * HTTP Error message.
+    *
+@@ -578,15 +578,15 @@
+    *
+    * Unhandled error stack trace, `data`, `body` and `message` are hidden for security reasons.
+    */
+-  unhandled?: boolean;
++  unhandled?: boolean | undefined;
+   /**
+    * Additional data to attach in the error JSON body under `data` key.
+    */
+-  data?: DataT;
++  data?: DataT | undefined;
+   /**
+    * Additional top level JSON body properties to attach in the error JSON body.
+    */
+-  body?: Record<string, unknown>;
++  body?: Record<string, unknown> | undefined;
+ }
+ /**
+  * HTTPError

@@ -1,0 +1,31 @@
+{
+  "name": "@serverless-jwt-internal/sveltekit",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:app": "node build.mjs",
+    "test:types": "svelte-kit sync --config vite.app.config.ts && tsc -p tsconfig.types.json && tsc -p ../../../packages/sveltekit/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/sveltekit --project @serverless-jwt-internal/sveltekit",
+    "typecheck:lib": "pnpm prepare:peers && pnpm test:types",
+    "prepare:peers": "pnpm --filter @serverless-jwt/sveltekit... build",
+    "build:cloudflare": "SJWT_CLOUDFLARE=1 node build.mjs"
+  },
+  "dependencies": {
+    "@serverless-jwt/sveltekit": "workspace:*"
+  },
+  "devDependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@sveltejs/adapter-cloudflare": "catalog:",
+    "@sveltejs/adapter-node": "catalog:",
+    "@sveltejs/kit": "catalog:",
+    "@sveltejs/vite-plugin-svelte": "catalog:",
+    "@types/node": "catalog:",
+    "svelte": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "wrangler": "catalog:"
+  },
+  "peerDependencies": {
+    "@sveltejs/kit": "3.1.1"
+  }
+}

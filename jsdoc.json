@@ -1,0 +1,19 @@
+{
+  "roots": ["."],
+  "excludePaths": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "fixtures",
+    ".stryker-tmp",
+    "reports",
+    ".react-router"
+  ],
+  "excludeFiles": [
+    "\\.d\\.[cm]?ts$",
+    "\\.test\\.[^.]+$",
+    "\\.spec\\.[^.]+$",
+    "routeTree\\.gen\\.ts$"
+  ],
+  "includeExtensions": [".ts", ".mts", ".cts"]
+}

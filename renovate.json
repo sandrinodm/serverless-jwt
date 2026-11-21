@@ -1,0 +1,77 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["before 6am on monday"],
+  "minimumReleaseAge": "7 days",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^e2e/images\\.json$/"],
+      "matchStrings": [
+        "\"version\": \"(?<currentValue>[^\"\\n]+)\",[\\s\\S]*?\"image\": \"(?<depName>[^\"@\\n]+)@(?<currentDigest>sha256:[a-f0-9]{64})\""
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "groupName": "e2e Docker images",
+      "groupSlug": "e2e-docker-images",
+      "pinDigests": true,
+      "automerge": false
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "pinDigests": true,
+      "automerge": false
+    },
+    {
+      "matchDepNames": ["jose"],
+      "groupName": null,
+      "automerge": false
+    },
+    {
+      "matchDepNames": [
+        "express",
+        "fastify",
+        "h3",
+        "hono",
+        "next",
+        "astro",
+        "react-router",
+        "@sveltejs/kit",
+        "@tanstack/react-start",
+        "@tanstack/solid-start",
+        "@netlify/functions",
+        "@netlify/edge-functions",
+        "@vercel/node",
+        "@types/aws-lambda"
+      ],
+      "groupName": null,
+      "automerge": false
+    },
+    {
+      "matchFileNames": ["pnpm-workspace.yaml"],
+      "matchDepNames": [
+        "!jose",
+        "!express",
+        "!fastify",
+        "!h3",
+        "!hono",
+        "!next",
+        "!astro",
+        "!react-router",
+        "!@sveltejs/kit",
+        "!@tanstack/react-start",
+        "!@tanstack/solid-start",
+        "!@netlify/functions",
+        "!@netlify/edge-functions",
+        "!@vercel/node",
+        "!@types/aws-lambda"
+      ],
+      "groupName": "weekly catalog",
+      "automerge": false
+    }
+  ]
+}

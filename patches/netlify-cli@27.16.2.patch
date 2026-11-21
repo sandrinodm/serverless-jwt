@@ -1,0 +1,21 @@
+diff --git a/dist/lib/functions/server.js b/dist/lib/functions/server.js
+--- a/dist/lib/functions/server.js
++++ b/dist/lib/functions/server.js
+@@ -3,7 +3,6 @@
+ import path from 'path';
+ import { shouldBase64Encode } from '@netlify/dev-utils';
+ import express from 'express';
+-import expressLogging from 'express-logging';
+ import { jwtDecode } from 'jwt-decode';
+ import { NETLIFYDEVLOG, log } from '../../utils/command-helpers.js';
+ import { UNLINKED_SITE_MOCK_ID } from '../../utils/dev.js';
+@@ -210,9 +209,6 @@
+     }));
+     app.use(express.raw({ limit: '6mb', type: '*/*' }));
+     app.use(createFormSubmissionHandler({ functionsRegistry, siteUrl }));
+-    app.use(expressLogging(console, {
+-        blacklist: ['/favicon.ico'],
+-    }));
+     app.all('{*splat}', functionHandler);
+     return app;
+ };

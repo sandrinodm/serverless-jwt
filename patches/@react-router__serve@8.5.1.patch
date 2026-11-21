@@ -1,0 +1,19 @@
+diff --git a/dist/cli.js b/dist/cli.js
+--- a/dist/cli.js
++++ b/dist/cli.js
+@@ -18,7 +18,6 @@
+ import { createRequestListener } from "@remix-run/node-fetch-server";
+ import compression from "compression";
+ import express from "express";
+-import morgan from "morgan";
+ import sourceMapSupport from "source-map-support";
+ //#region cli.ts
+ process.env.NODE_ENV = process.env.NODE_ENV ?? "production";
+@@ -120,7 +119,6 @@
+ 	app.use(expressPublicPath, express.static(assetsBuildDirectory));
+ 	app.use(express.static("public", { maxAge: "1h" }));
+ 	app.use("/.well-known", express.static(path.join(assetsBuildDirectory, ".well-known")));
+-	app.use(morgan("tiny"));
+ 	if (build.fetch) app.all("/{*splat}", createRequestListener(build.fetch));
+ 	else if (buildModule.unstable_apiOnly === true) {
+ 		let serverBuild = build;

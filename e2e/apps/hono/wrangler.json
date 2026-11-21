@@ -1,0 +1,5 @@
+{
+  "name": "serverless-jwt-hono-example",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-11-03"
+}
