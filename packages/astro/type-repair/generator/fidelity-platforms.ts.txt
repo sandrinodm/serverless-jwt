@@ -1,0 +1,10 @@
+import type { KVNamespace, R2Bucket } from './node_modules/@cloudflare/workers-types/index.ts';
+import type { Kv } from '@deno/kv';
+import type { BuiltinDriverOptions } from './options-bundle.js';
+declare const kv:KVNamespace;
+declare const bucket:R2Bucket;
+declare const denoKv:Kv;
+const kvOptions:BuiltinDriverOptions['cloudflare-kv-binding']={binding:kv};
+const bucketOptions:BuiltinDriverOptions['cloudflare-r2-binding']={binding:bucket};
+const denoOptions:BuiltinDriverOptions['deno-kv']={openKv:()=>Promise.resolve(denoKv)};
+void [kvOptions,bucketOptions,denoOptions];

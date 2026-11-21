@@ -1,0 +1,6 @@
+{
+  "baselineGzipBytes": 15696,
+  "maxGzipBytes": 16481,
+  "measuredOn": "2026-11-11",
+  "bundler": "Vite+ 1.5.0 bundled Rolldown; ES2023; minify true; gzip level 9"
+}

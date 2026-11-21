@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "react", "react-dom"],
+    "lib": ["ES2025", "ESNext.Disposable", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "rootDirs": [".", "./.react-router/types"]
+  },
+  "include": ["app", "react-router.config.ts", ".react-router/types/**/*"]
+}

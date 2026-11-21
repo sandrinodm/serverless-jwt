@@ -1,47 +1,46 @@
 {
   "name": "@serverless-jwt/jwt-verifier",
-  "version": "0.2.1",
-  "description": "JWT verification for Serverless environments",
-  "author": "Sandrino Di Mattia",
-  "homepage": "https://github.com/sandrinodimattia/serverless-jwt#readme",
+  "version": "0.0.0",
+  "description": "Portable access-token verification.",
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "directories": {
-    "lib": "dist"
-  },
-  "files": [
-    "dist/**"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sandrinodimattia/serverless-jwt.git"
+    "url": "git+https://github.com/sandrinodm/serverless-jwt.git",
+    "directory": "packages/jwt-verifier"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./adapter": {
+      "source": "./src/adapter.ts",
+      "default": "./dist/adapter.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./adapter": "./dist/adapter.mjs",
+      "./package.json": "./package.json"
+    },
+    "access": "public"
   },
   "scripts": {
-    "prepublishOnly": "npm run build",
-    "prebuild": "npm run clean",
-    "build": "tsc -p tsconfig.build.json",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo && rm -rf tsconfig.build.tsbuildinfo"
-  },
-  "bugs": {
-    "url": "https://github.com/sandrinodimattia/serverless-jwt/issues"
-  },
-  "devDependencies": {
-    "@types/jsonwebtoken": "^8.5.0",
-    "@types/lru-cache": "^5.1.0",
-    "@types/node-fetch": "^2.5.7",
-    "nock": "^13.0.2",
-    "timekeeper": "^2.2.0"
+    "build": "vp pack",
+    "prepack": "vp pack",
+    "typecheck:lib": "tsc -p tsconfig.lib.json"
   },
   "dependencies": {
-    "abortcontroller-polyfill": "^1.4.0",
-    "jsonwebtoken": "^8.5.1",
-    "limiter": "^1.1.5",
-    "lru-memoizer": "^2.1.2",
-    "node-fetch": "^2.6.1",
-    "wretch": "^1.7.2"
+    "jose": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }

@@ -1,0 +1,23 @@
+{
+  "name": "@serverless-jwt-internal/netlify",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.json && tsc -p ../../../packages/netlify/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/netlify",
+    "build:app": "node build.mjs"
+  },
+  "dependencies": {
+    "@serverless-jwt/netlify": "workspace:*"
+  },
+  "devDependencies": {
+    "@netlify/edge-functions": "catalog:",
+    "@netlify/functions": "catalog:",
+    "@types/node": "catalog:",
+    "netlify-cli": "catalog:"
+  },
+  "peerDependencies": {
+    "@netlify/edge-functions": "4.0.3",
+    "@netlify/functions": "6.1.0"
+  }
+}

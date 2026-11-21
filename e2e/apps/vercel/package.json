@@ -1,0 +1,21 @@
+{
+  "name": "@serverless-jwt-internal/vercel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.types.json && tsc -p ../../../packages/vercel/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/vercel",
+    "build:app": "node build.mjs"
+  },
+  "dependencies": {
+    "@serverless-jwt/vercel": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vercel/functions": "catalog:",
+    "vercel": "catalog:"
+  },
+  "peerDependencies": {
+    "@vercel/functions": "3.10.6"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "@serverless-jwt-internal/tanstack-start",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:app": "node build.mjs",
+    "test:types": "node types.mjs",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/tanstack-start",
+    "prepare:peers": "pnpm --filter @serverless-jwt/tanstack-start... build && node build.mjs",
+    "typecheck:lib": "pnpm prepare:peers",
+    "test:response": "node ../../../scripts/tanstack-response-check.mjs"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@serverless-jwt/tanstack-start": "workspace:*"
+  },
+  "devDependencies": {
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-start": "catalog:",
+    "@tanstack/solid-router": "catalog:",
+    "@tanstack/solid-start": "catalog:",
+    "@tanstack/start-client-core": "catalog:",
+    "@tanstack/start-server-core": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "nitro": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "solid-js": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-solid": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "@tanstack/react-start": "1.169.4",
+    "@tanstack/solid-start": "1.169.4",
+    "@tanstack/start-client-core": "1.170.39",
+    "@tanstack/start-server-core": "1.169.45"
+  }
+}

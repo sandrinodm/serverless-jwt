@@ -1,8 +1,8 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "./tsconfig.lib.json",
   "compilerOptions": {
-    "typeRoots": ["../../node_modules/@types", "./node_modules/@types", "./typings/*.d.ts"]
+    "types": ["node"]
   },
-  "exclude": ["node_modules", "dist"],
-  "include": ["src", "test", "typings"]
+  "include": ["src", "vite.config.ts"],
+  "exclude": []
 }

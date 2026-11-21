@@ -1,0 +1,10 @@
+{
+  "package": "@react-router/serve",
+  "version": "8.5.1",
+  "file": "dist/cli.js",
+  "originalSha256": "df43acd7339a16a06ef2df7933143eb30e59b40555006b9c8eb7371d205fc0c9",
+  "patchedSha256": "b10a5fa8d5af6f3a83589456d1f879dd7ffd3bf3e4f0b507ded1b70104911cf8",
+  "purpose": "Remove only unconditional URL access logging; identical native server/request/response pipelines and all other stdout/stderr remain guarded. No published JWT artifact is modified.",
+  "configurationEvidence": "https://reactrouter.com/api/other-api/serve states the app server intentionally provides no customization options; installed exact CLI uses morgan tiny unconditionally. HOST and PORT do not control request logging.",
+  "reassess": "On every exact serve update, inspect supported request-log configuration and remove when an eligible unpatched release passes full minted-query/cookie/two200 rounds and logguard controls."
+}

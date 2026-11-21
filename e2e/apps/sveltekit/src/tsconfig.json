@@ -1,0 +1,4 @@
+{
+  "extends": "../tsconfig.types.json",
+  "include": ["./**/*.ts", "../.svelte-kit/types/**/*.d.ts"]
+}

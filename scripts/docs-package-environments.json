@@ -1,0 +1,110 @@
+{
+  "jwt-verifier": [
+    ["Node", "24.0.0 and 26.12.1; exact-tarball ESM/require and strict consumers"],
+    ["Portable runtimes", "Deno 2.9.6, Bun 1.4.4 and workerd"]
+  ],
+  "cloudflare": [
+    ["SDK/host", "Workers types 5.20261104.1; Wrangler 4.157.0, local workerd 1.20261103.1"],
+    ["Forms", "Workers and Pages Functions; native conformance and local HTTPS issuer"],
+    ["Limits", "Hosted ingress/deployment unverified; independent per-request key I/O on workerd"]
+  ],
+  "next": [
+    ["Framework", "Next 16.4.5; React/React DOM 19.3.1 in framework apps"],
+    [
+      "Forms",
+      "App Router, proxy and Pages API; actual production builds/start and strict packed consumers"
+    ],
+    [
+      "Limits",
+      "Reviewed Satori/Sharp declaration links; separate wire Authorization lines can be discarded by stock Next ingress"
+    ]
+  ],
+  "netlify": [
+    ["SDK/host", "Functions 6.1.0; Edge Functions 4.0.3; CLI 27.16.2 offline"],
+    ["Forms", "Functions v2, Deno Edge and transitional Lambda-compatible v1"],
+    [
+      "Limits",
+      "Hosted deployment unverified; local CLI can discard repeated wire Authorization lines; v1 is deprecated"
+    ]
+  ],
+  "vercel": [
+    ["SDK/host", "Functions 3.10.6; CLI 65.11.0; Node 24 local build/output"],
+    ["Forms", "Named Web handlers; actual account-free local development ingress"],
+    [
+      "Limits",
+      "Hosted deployment/ingress unverified; Vercel Edge disables cross-request I/O sharing"
+    ],
+    [
+      "Native development cache",
+      "Vercel CLI 65.11.0 starts a fresh function worker for each request. The production Build Output test also covers worker reuse."
+    ]
+  ],
+  "hono": [
+    ["Framework", "Hono 4.13.16; @hono/node-server 2.1.6"],
+    ["Hosts", "Node, Bun 1.4.4, Deno 2.9.6 and Wrangler 4.157.0/workerd"],
+    ["Coverage", "Native conformance, strict packed types and local real-issuer HTTP checks"]
+  ],
+  "sveltekit": [
+    ["Framework", "SvelteKit 3.1.1; adapter-node 6.0.1; adapter-cloudflare 8.0.2"],
+    ["Forms", "Native hooks, sequence composition, build registration and packed SSR consumer"],
+    [
+      "Limits",
+      "Required build registration rejects protected static output; predicate protection cannot analyse static output"
+    ]
+  ],
+  "astro": [
+    ["Framework", "Astro 7.4.5; @astrojs/node 11.1.9 standalone"],
+    ["Runtime", "Local production server and native middleware authentication checks"],
+    [
+      "Strict SDK types",
+      "Strict NodeNext and Bundler consumers require the explicit Astro declaration repair."
+    ]
+  ],
+  "react-router": [
+    ["Framework", "React Router 8.5.1 and react-router-serve 8.5.1"],
+    ["Forms", "Production resource/API routes and application-owned typed context"],
+    ["Coverage", "Native middleware conformance, strict types and local production HTTP"]
+  ],
+  "tanstack-start": [
+    ["Framework", "React Start and Solid Start 1.169.4"],
+    ["Shared cores", "client-core 1.170.39; server-core 1.169.45; Nitro 3.0.261103-rc"],
+    ["Forms", "Native request/function middleware, compiled RPC and production React/Solid hosts"]
+  ],
+  "express": [
+    ["Framework endpoints", "Express 5.0.0 and 5.3.0"],
+    ["Host", "Node 24 native HTTP and literal TCP header tests"],
+    [
+      "Coverage",
+      "Request-owned auth, duplicate rejection, native conformance and strict packed types"
+    ]
+  ],
+  "fastify": [
+    ["Framework endpoints", "Fastify 5.0.0 and 5.12.8; fastify-plugin 6.0.1"],
+    ["Host", "Node 24; actual inject and native HTTP/TCP"],
+    ["Coverage", "Encapsulation, request-owned auth, native conformance and strict packed types"]
+  ],
+  "aws-lambda": [
+    ["SDK types", "@types/aws-lambda 8.10.164"],
+    ["Forms", "API Gateway v1/v2, ALB single/multi-value; local Node 24 HTTP bridge"],
+    [
+      "Limits",
+      "The ALB single-value boundary cannot recover discarded duplicate headers; hosted Lambda deployment unverified"
+    ],
+    [
+      "Floci200 gate",
+      "Nightly check for 200 concurrent Lambda invocations on a dedicated GitHub-hosted runner. See the development guide for runner requirements."
+    ]
+  ],
+  "nuxt": [
+    ["Nuxt/h3 v1", "Nuxt 4.6.4; Nitro 2.13.6; h3 1.15.0 and 1.15.11"],
+    ["h3 v2", "h3 2.0.1 and 2.0.8; actual Web Requests and toNodeHandler"],
+    [
+      "Coverage",
+      "Pattern/predicate boundaries, native event inference, Node 24 production hosts and strict packed consumers"
+    ],
+    [
+      "Independent nightly hosts",
+      "Standalone Nitro 2.13.6/h3 v1 and SolidStart 2.2.1/Nitro 3/h3 v2. The SolidStart fixture uses pinned workspace declaration patches."
+    ]
+  ]
+}

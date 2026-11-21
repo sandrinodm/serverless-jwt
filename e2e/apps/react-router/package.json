@@ -1,0 +1,30 @@
+{
+  "name": "@serverless-jwt-internal/react-router",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:app": "node build.mjs",
+    "test:types": "react-router typegen && tsc -p tsconfig.json && tsc -p ../../../packages/react-router/tsconfig.types.json",
+    "typecheck:lib": "pnpm test:types",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/react-router"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@serverless-jwt/react-router": "workspace:*",
+    "isbot": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-router": "catalog:"
+  },
+  "devDependencies": {
+    "@react-router/dev": "catalog:",
+    "@react-router/serve": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "react-router": "8.5.1"
+  }
+}

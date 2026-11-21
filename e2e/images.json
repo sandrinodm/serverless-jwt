@@ -1,0 +1,30 @@
+{
+  "platform": "linux/amd64",
+  "images": {
+    "keycloak": {
+      "version": "26.8.0",
+      "image": "quay.io/keycloak/keycloak@sha256:ad1b0f0fa4bb5eff10f7a78eaafbb6d65b25431c1f824b0710836d74373a7dfb"
+    },
+    "toxiproxy": {
+      "version": "2.13.0",
+      "image": "ghcr.io/shopify/toxiproxy@sha256:9941f0357759e6c9bfe0ad45e20c415100505113da0f5c436cfd0a4d27579fdc"
+    },
+    "floci": {
+      "version": "2.4.0",
+      "image": "floci/floci@sha256:7ab87e9a83909072aceb33d7026f8127a5f5dd693a974e0d30a0474eafcf91b9"
+    },
+    "lambda": {
+      "version": "24.2026.11.04.16-x86_64",
+      "node": "24.22.2",
+      "image": "public.ecr.aws/lambda/nodejs@sha256:2f543c76248d6ce219b85e3783c9cbf42059f3146d860dabdfdc5157fa313e99"
+    },
+    "ryuk": {
+      "version": "0.14.0",
+      "image": "testcontainers/ryuk@sha256:f0456560ea5b4acdbed0da0efc33b5f9dd6bc1e59f2337106826dcb5b0b0e981"
+    },
+    "sshd": {
+      "version": "1.4.0",
+      "image": "testcontainers/sshd@sha256:a1b4ec00f6fe2fda0197e1cf0fb5de1123b584d75f7a46e23309b5bf609e2100"
+    }
+  }
+}

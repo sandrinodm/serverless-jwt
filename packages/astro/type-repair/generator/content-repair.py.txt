@@ -1,0 +1,31 @@
+from pathlib import Path
+import re
+root=Path(__file__).parent/'node_modules/astro'
+functions=['getCollection','getLiveCollection','getEntry','getLiveEntry','getEntries','render','reference']
+aliases=['CollectionKey','CollectionEntry','ContentConfig']
+def transform_generated(text):
+ names={name:'ServerlessJwt'+name[0].upper()+name[1:] for name in functions+aliases}
+ for name,replacement in names.items():
+  text=re.sub(r'\b'+name+r'\b',replacement,text)
+  text=text.replace('export function '+replacement, 'function '+replacement).replace('export type '+replacement, 'type '+replacement)
+ text=text.replace('infer TData,','infer TData extends Record<string, any>,').replace('infer TEntryFilter,','infer TEntryFilter extends Record<string, any> | never,').replace('infer TCollectionFilter,','infer TCollectionFilter extends Record<string, any> | never,').replace('infer TError\n','infer TError extends Error\n')
+ text=text.replace('interface Render {','export interface Render {')
+ for name in ['Flatten', 'AllValuesOf', 'ReturnTypeOrOriginal', 'InferEntrySchema', 'ExtractLoaderConfig', 'InferLoaderSchema', 'DataEntryMap', 'ExtractLoaderTypes', 'ExtractEntryFilterType', 'ExtractCollectionFilterType', 'ExtractErrorType', 'ExtractDataType', 'LiveLoaderDataType', 'LiveLoaderEntryFilterType', 'LiveLoaderCollectionFilterType', 'LiveLoaderErrorType']: text=re.sub(r'\ttype '+name+r'\b','\texport type '+name,text)
+ bridge='\n\texport interface ServerlessJwtGeneratedContent {\n\t\tentryMap: DataEntryMap;\n\t\tcontentConfig: '+names['ContentConfig']+';\n'
+ for name in functions:bridge+='\t\t'+name+': typeof '+names[name]+';\n'
+ bridge+='\t}\n'
+ return text[:text.rfind('}')]+bridge+'\n\texport {};\n'+text[text.rfind('}'):]
+p=root/'types/content.d.ts';source=Path('/tmp/astro-concrete-generator/pristine/package/types/content.d.ts').read_text().replace('export const z = zod.z;', 'export const z: typeof zod.z;')
+# Preserve the original pre-sync fallback signatures while allowing actual generated exact signatures to replace them.
+for name in functions:
+ pattern=r'export const '+name+r': ([^;]+);'
+ match=re.search(pattern,source);assert match,name
+ original=match[1]
+ source=source[:match.start()]+'export const '+name+': ServerlessJwtGeneratedContent extends { '+name+': infer Generated } ? Generated : '+original+';'+source[match.end():]
+source=source.replace('export type CollectionKey = any;', 'export type CollectionKey = ServerlessJwtGeneratedContent extends { entryMap: infer Map } ? keyof Map : any;')
+source=source.replace('export type CollectionEntry<C> = any;', 'export type CollectionEntry<C extends CollectionKey> = ServerlessJwtGeneratedContent extends { entryMap: infer Map } ? C extends keyof Map ? Map[C][keyof Map[C]] : never : any;')
+source=source.replace('export type ContentConfig = any;', 'export type ContentConfig = ServerlessJwtGeneratedContent extends { contentConfig: infer Config } ? Config : any;')
+source=source.replace("declare module 'astro:content' {", "declare module 'astro:content' {\n\t/** Exact generated declarations merge here after astro sync; pre-sync fallbacks retain the original SDK signatures. */\n\texport interface ServerlessJwtGeneratedContent {}")
+p.write_text(source)
+p=root/'templates/content/types.d.ts';p.write_text(transform_generated(Path('/tmp/astro-concrete-generator/pristine/package/templates/content/types.d.ts').read_text()))
+p=root/'dist/types/public/content.d.ts';source=Path('/tmp/astro-concrete-generator/pristine/package/dist/types/public/content.d.ts').read_text();assert source.count('TData extends Record<string, any> = Record<string, any>')==4;p.write_text(source.replace('TData extends Record<string, any> = Record<string, any>','TData = Record<string, any>'))

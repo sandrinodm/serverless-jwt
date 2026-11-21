@@ -1,48 +1,25 @@
-# Change Log
+# Changelog
 
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+[README](README.md)
 
-## [0.2.1](https://github.com/sandrinodimattia/serverless-jwt/compare/v0.2.0...v0.2.1) (2021-01-11)
+## 1.0.0 — unreleased
 
-**Note:** Version bump only for package serverless-jwt
+### Security
 
-# [0.2.0](https://github.com/sandrinodimattia/serverless-jwt/compare/v0.1.8...v0.2.0) (2020-07-29)
+- Require expiration by default, exact issuer/API audience verification and explicit asymmetric algorithms.
+- Bound token, JWKS, network, concurrency and verification resources; recover from discovery/key outages with safe 503 responses and Retry-After.
+- Keep signed claims immutable, reject namespace collisions and return fixed non-reflective error descriptions.
+- Require provider-specific access-token separation; document unverified shared-audience configurations.
 
-### Features
+### Breaking
 
-- added cloudflare integration ([175813b](https://github.com/sandrinodimattia/serverless-jwt/commit/175813bc08c9948efad282f68e7fde7539ee3f8a))
+- Replace JwtVerifier construction with createJwtVerifier and verifyAccessToken with verify returning Auth.
+- Keep mapped identity separate from signed claims and pass authentication through explicit integration boundaries.
+- Require Node 24+ and ship ESM; change helper semantics and swap removeNamespaces arguments.
+- Replace legacy handleError callbacks with typed awaited onError hooks.
 
-## [0.1.8](https://github.com/sandrinodimattia/serverless-jwt/compare/v0.1.7...v0.1.8) (2020-07-28)
+### Added
 
-**Note:** Version bump only for package serverless-jwt
-
-## [0.1.7](https://github.com/sandrinodimattia/serverless-jwt/compare/v0.1.6...v0.1.7) (2020-07-24)
-
-**Note:** Version bump only for package serverless-jwt
-
-## [0.1.6](https://github.com/sandrinodimattia/serverless-jwt/compare/v0.1.5...v0.1.6) (2020-07-24)
-
-### Bug Fixes
-
-- **netlify:** renamed user to claims in the identity context ([276c5ab](https://github.com/sandrinodimattia/serverless-jwt/commit/276c5ab76dd1df94974c5171d23faff851e6d217))
-
-## [0.1.5](https://github.com/sandrinodimattia/serverless-jwt/compare/v0.1.4...v0.1.5) (2020-07-24)
-
-**Note:** Version bump only for package serverless-jwt
-
-## [0.1.4](https://github.com/sandrinodimattia/serverless-jwt/compare/v0.1.3...v0.1.4) (2020-07-24)
-
-**Note:** Version bump only for package serverless-jwt
-
-## [0.1.3](https://github.com/sandrinodimattia/serverless-jwt/compare/v0.1.2...v0.1.3) (2020-07-23)
-
-**Note:** Version bump only for package serverless-jwt
-
-## [0.1.2](https://github.com/sandrinodimattia/serverless-jwt/compare/v0.1.1...v0.1.2) (2020-07-23)
-
-**Note:** Version bump only for package serverless-jwt
-
-## 0.1.1 (2020-07-23)
-
-**Note:** Version bump only for package serverless-jwt
+- Official framework integrations, portable key ownership policies and generic/RFC 9068 token profiles.
+- Scope checks, diagnostics, exact-artifact package tests and standalone public local verification.
+- Provider-specific configuration guides.

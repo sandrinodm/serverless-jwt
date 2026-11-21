@@ -1,0 +1,19 @@
+{
+  "name": "@serverless-jwt-internal/cloudflare",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.json && tsc -p ../../../packages/cloudflare/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --config packages/cloudflare/workerd.config.mjs"
+  },
+  "dependencies": {
+    "@serverless-jwt/cloudflare": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
+    "wrangler": "catalog:"
+  },
+  "peerDependencies": {
+    "@cloudflare/workers-types": "5.20261104.1"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "package": "netlify-cli",
+  "version": "27.16.2",
+  "file": "dist/lib/functions/server.js",
+  "originalSha256": "0e227cd0b170ba2ff6720754942ad98c3c90314ffbd4b528ae0bbe808259ec0e",
+  "patchedSha256": "c6979322f5f0f9ff41d3e0cab960fb35f498c66475918c8d212a31136ec9a28b",
+  "purpose": "Remove only unconditional URL access logging, which exposes rejected query-string credentials. All CLI/application stdout/stderr remain guarded.",
+  "reassess": "On every CLI update, check whether upstream removes query strings or provides a request-logging setting; remove the patch when an eligible unpatched release passes the full minted-query test and logguard controls."
+}

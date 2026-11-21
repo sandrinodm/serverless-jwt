@@ -1,0 +1,9 @@
+{
+  "workspaceAlias": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+  "wrapperVersion": "1.5.0",
+  "apiVersion": "8.3.5",
+  "published": "2026-10-21T06:38:54.907Z",
+  "integrity": "sha512-z1YpjieJ9g0ebTmQpLBv/oq9E3F9EIlOe+7LahW8SrE3LTiG3udBRUXQOlYXP9b+IC2q2phHeVxj9xGlw34OEQ==",
+  "tarball": "https://registry.npmjs.org/vite/-/vite-8.3.5.tgz",
+  "purpose": "Normal npm consumers use the actual native Vite API peer version. Vite+1.5.0 exports Vite8.3.5 but its aliased package version cannot satisfy native Vite8 peers in npm; workspace pnpm allowAny semantics are not portable. Native Vite+ programmatic builds retain framework config, cwd, environment, output scans and native type checks."
+}

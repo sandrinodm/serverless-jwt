@@ -1,0 +1,25 @@
+{
+  "packages": {
+    "netlify-cli": {
+      "version": "27.16.2",
+      "published": "2026-11-02T12:47:24.992Z",
+      "integrity": "sha512-rRy3qR18LW/bn6DGaw/QPr7MvOGv3tx6SN2dw2OLKukToggOcooH1M13rCigGE/EW31VhAS7GYAH9mS6suo0/Q==",
+      "tarball": "https://registry.npmjs.org/netlify-cli/-/netlify-cli-27.16.2.tgz"
+    },
+    "ts-api-utils": {
+      "version": "2.5.0",
+      "published": "2026-03-19T02:50:49.789Z",
+      "integrity": "sha512-OJ/ibxhPlqrMM0UiNHJ/0CKQkoKF243/AEmplt3qpRgkW8VG7IfOS41h7V8TjITqdByHzrjcS/2si+y4lIh8NA==",
+      "tarball": "https://registry.npmjs.org/ts-api-utils/-/ts-api-utils-2.5.0.tgz"
+    },
+    "typescript": {
+      "version": "5.9.3",
+      "published": "2025-09-30T21:19:38.784Z",
+      "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
+      "tarball": "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz"
+    }
+  },
+  "applicationCompiler": "7.0.2",
+  "purpose": "Isolate only Netlify CLI runtime TypeScript API peers from the ordinary npm public-library/app compiler graph. The native application compiler remains TS7; no public type-check fallback is permitted.",
+  "remove": "Reassess on every exact CLI or API helper version change; remove isolation only after default-hoisted CLI passes native build/dev/query controls with TS7 compiler and public core identity unchanged."
+}

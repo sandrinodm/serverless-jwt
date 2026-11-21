@@ -1,37 +1,52 @@
 {
   "name": "@serverless-jwt/cloudflare",
-  "version": "0.2.1",
-  "description": "JWT verification for Cloudflare Workers",
-  "author": "Sandrino Di Mattia",
-  "homepage": "https://github.com/sandrinodimattia/serverless-jwt#readme",
+  "version": "0.0.0",
+  "description": "Access-token authentication for Cloudflare Workers and Pages Functions.",
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "directories": {
-    "lib": "dist"
-  },
-  "files": [
-    "dist/**"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sandrinodimattia/serverless-jwt.git"
+    "url": "git+https://github.com/sandrinodm/serverless-jwt.git",
+    "directory": "packages/cloudflare"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./package.json": "./package.json"
+    },
+    "access": "public"
   },
   "scripts": {
-    "prepublishOnly": "npm run build",
-    "prebuild": "npm run clean",
-    "build": "tsc -p tsconfig.build.json",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo && rm -rf tsconfig.build.tsbuildinfo"
-  },
-  "bugs": {
-    "url": "https://github.com/sandrinodimattia/serverless-jwt/issues"
+    "build": "vp pack",
+    "prepack": "vp pack",
+    "typecheck:lib": "tsc -p tsconfig.lib.json"
   },
   "dependencies": {
-    "@serverless-jwt/jwt-verifier": "0.2.1",
-    "@types/node-fetch": "^2.5.7",
-    "node-fetch": "^2.6.1"
+    "@serverless-jwt/jwt-verifier": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "catalog:"
+  },
+  "peerDependencies": {
+    "@cloudflare/workers-types": "5.20261104.1"
+  },
+  "peerDependenciesMeta": {
+    "@cloudflare/workers-types": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }

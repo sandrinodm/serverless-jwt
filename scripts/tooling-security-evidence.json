@@ -1,0 +1,418 @@
+{
+  "package": "@stackline/deepmerge",
+  "version": "1.1.0",
+  "published": "2026-10-13T16:49:50.456Z",
+  "selectionCutoff": "2026-11-04T18:58:10.328337Z",
+  "integrity": "sha512-bEQ1EpXrlu9PTTgKD9z85MWYGjDMv79fF2qn2LYdmukpuj6onkn5kZlRAu0PaZvUv9ZQerwtDVgIEn2LYtsE7w==",
+  "tarballSha256": "06240b676d0166880711e2b4c8c267ea9c6417b6404fe82895edd7b6acf19889",
+  "entries": {
+    "dist/index.cjs": "cbec3cb6f58b87ee09f2ee53cc7ecf1c5fbd9650bd38bc3a4845d99086d5f4bd",
+    "dist/index.js": "bfa1150d7067584342a5f8f67ec04db513923f30985ec48a9d8de34894cc52c6"
+  },
+  "registrySignatures": [
+    {
+      "sig": "MEYCIQDS6uEsSnGvIz42YJTpgap9vcyq6+7bOKSv9zbmTfCIzQIhAL8w3fBVv1UaGC/aLuy5HKID8mnGGqfI+XOsS8lCMeTC",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+    },
+    {
+      "sig": "MEUCIDB38rROJm3VFyg4QKVsXsDBzanwILF3yvlWXvaOuPrrAiEAiNmadPkLT7bsnc+NWSPJjdsxZTak0JNM8PCsupNi3i0=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+    }
+  ],
+  "registryAttestations": {
+    "url": "https://registry.npmjs.org/-/npm/v1/attestations/@stackline%2fdeepmerge@1.1.0",
+    "provenance": {
+      "predicateType": "https://slsa.dev/provenance/v1"
+    }
+  },
+  "verification": {
+    "command": "npm audit signatures --json --include-attestations",
+    "exitCode": 0,
+    "invalid": [],
+    "missing": [],
+    "verified": [
+      {
+        "name": "@stackline/deepmerge",
+        "version": "1.1.0",
+        "location": "node_modules/deepmerge",
+        "registry": "https://registry.npmjs.org/",
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/@stackline%2fdeepmerge@1.1.0",
+          "provenance": {
+            "predicateType": "https://slsa.dev/provenance/v1"
+          }
+        }
+      }
+    ],
+    "statements": [
+      {
+        "_type": "https://in-toto.io/Statement/v0.1",
+        "subject": [
+          {
+            "name": "pkg:npm/%40stackline/deepmerge@1.1.0",
+            "digest": {
+              "sha512": "6c44351295eb96ef4f4d380a0fdcfce4c5981a30ccbfbf5f176aa7d8b61d9ae929ba3ea89e49f991995102ed0f699bd4bfd6507abc2d0d5808127d8b62db04ef"
+            }
+          }
+        ],
+        "predicateType": "https://github.com/npm/attestation/tree/main/specs/publish/v0.1",
+        "predicate": {
+          "name": "@stackline/deepmerge",
+          "version": "1.1.0",
+          "registry": "https://registry.npmjs.org"
+        }
+      },
+      {
+        "_type": "https://in-toto.io/Statement/v1",
+        "subject": [
+          {
+            "name": "pkg:npm/%40stackline/deepmerge@1.1.0",
+            "digest": {
+              "sha512": "6c44351295eb96ef4f4d380a0fdcfce4c5981a30ccbfbf5f176aa7d8b61d9ae929ba3ea89e49f991995102ed0f699bd4bfd6507abc2d0d5808127d8b62db04ef"
+            }
+          }
+        ],
+        "predicateType": "https://slsa.dev/provenance/v1",
+        "predicate": {
+          "buildDefinition": {
+            "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+            "externalParameters": {
+              "workflow": {
+                "ref": "refs/heads/main",
+                "repository": "https://github.com/alexandroit/stackline-deepmerge",
+                "path": ".github/workflows/publish.yml"
+              }
+            },
+            "internalParameters": {
+              "github": {
+                "event_name": "workflow_dispatch",
+                "repository_id": "1335611458",
+                "repository_owner_id": "42686990"
+              }
+            },
+            "resolvedDependencies": [
+              {
+                "uri": "git+https://github.com/alexandroit/stackline-deepmerge@refs/heads/main",
+                "digest": {
+                  "gitCommit": "d87de3d06ef427d45e5e45fa13f61dc677d27c55"
+                }
+              }
+            ]
+          },
+          "runDetails": {
+            "builder": {
+              "id": "https://github.com/actions/runner/github-hosted"
+            },
+            "metadata": {
+              "invocationId": "https://github.com/alexandroit/stackline-deepmerge/actions/runs/38433471277/attempts/1"
+            }
+          }
+        }
+      }
+    ],
+    "rawReportSha256": "14014f67a0930e4eb6248e62a757dec60b3dc9d738350110ae91caf9fe00adfb"
+  },
+  "sourceReview": {
+    "blockedKeys": "Both object loops reject __proto__ before property reads or writes. Object.prototype keys use defineProperty.",
+    "compatibility": "Constructor/prototype retain upstream default semantics; cycle/frozen-options/callback-count differences require actual consumer checks.",
+    "removalTrigger": "Reassess when either exact parent changes; replace with eligible upstream release only after the same security and consumer probes pass."
+  },
+  "pythonSchemaComparisons": {
+    "roots": ["/home/dev/code/serverless-jwt", "/tmp/serverless-jwt-p4-audit-spike"],
+    "cases": [
+      {
+        "schema": "PipfileLikeSchema",
+        "expected": true,
+        "oldSuccess": true,
+        "newSuccess": true,
+        "equalData": true
+      },
+      {
+        "schema": "PipfileLikeSchema",
+        "expected": true,
+        "oldSuccess": true,
+        "newSuccess": true,
+        "equalData": true
+      },
+      {
+        "schema": "PipfileLikeSchema",
+        "expected": false,
+        "oldSuccess": false,
+        "newSuccess": false
+      },
+      {
+        "schema": "PipfileLikeSchema",
+        "expected": true,
+        "oldSuccess": true,
+        "newSuccess": true,
+        "equalData": true
+      },
+      {
+        "schema": "PipfileLockLikeSchema",
+        "expected": true,
+        "oldSuccess": true,
+        "newSuccess": true,
+        "equalData": true
+      },
+      {
+        "schema": "PipfileLockLikeSchema",
+        "expected": false,
+        "oldSuccess": false,
+        "newSuccess": false
+      },
+      {
+        "schema": "PyProjectTomlSchema",
+        "expected": true,
+        "oldSuccess": true,
+        "newSuccess": true,
+        "equalData": true
+      },
+      {
+        "schema": "PyProjectTomlSchema",
+        "expected": false,
+        "oldSuccess": false,
+        "newSuccess": false
+      },
+      {
+        "schema": "PyProjectTomlSchema",
+        "expected": false,
+        "oldSuccess": false,
+        "newSuccess": false
+      },
+      {
+        "schema": "PyProjectTomlSchema",
+        "expected": true,
+        "oldSuccess": true,
+        "newSuccess": true,
+        "equalData": true
+      },
+      {
+        "schema": "UvConfigSchema",
+        "expected": true,
+        "oldSuccess": true,
+        "newSuccess": true,
+        "equalData": true
+      },
+      {
+        "schema": "UvConfigSchema",
+        "expected": false,
+        "oldSuccess": false,
+        "newSuccess": false
+      },
+      {
+        "schema": "PersonSchema",
+        "expected": true,
+        "oldSuccess": true,
+        "newSuccess": true,
+        "equalData": true
+      },
+      {
+        "schema": "PersonSchema",
+        "expected": false,
+        "oldSuccess": false,
+        "newSuccess": false
+      }
+    ]
+  },
+  "originalSecurityRegression": {
+    "original": "4.3.1",
+    "reproduced": 3,
+    "currentRegressionRejectsOriginal": true
+  },
+  "originalEntrySha256": "2e5160f84a1141bd927264afe4d15766f1e6cf07daef182b37ff53fea121de7d",
+  "publicationHistory": {
+    "created": "2026-08-16T04:20:04.064Z",
+    "modified": "2026-11-04T21:24:18.159Z",
+    "1.0.0": "2026-08-16T04:20:04.397Z",
+    "1.0.1": "2026-08-21T22:18:32.731Z",
+    "1.0.2": "2026-09-28T16:32:20.158Z",
+    "1.0.3": "2026-09-29T02:50:04.696Z",
+    "1.0.4": "2026-09-29T02:57:21.558Z",
+    "1.1.0": "2026-10-13T16:49:50.456Z",
+    "1.1.1": "2026-11-04T19:51:37.876Z",
+    "1.1.2": "2026-11-04T21:24:17.792Z"
+  },
+  "otherOverridePublicationEvidence": [
+    {
+      "name": "undici",
+      "published": {
+        "6.29.1": "2026-10-15T14:19:28.454Z"
+      },
+      "command": [
+        "npm",
+        "view",
+        "undici",
+        "versions",
+        "time",
+        "dist-tags",
+        "--json",
+        "--cache",
+        "/tmp/serverless-jwt-npm-cache"
+      ],
+      "selectionCutoff": "2026-11-04T18:58:10.328337+00:00"
+    },
+    {
+      "name": "path-to-regexp",
+      "published": {
+        "6.3.0": "2024-09-12T01:09:36.065Z",
+        "8.4.2": "2026-04-01T21:17:05.201Z"
+      },
+      "command": [
+        "npm",
+        "view",
+        "path-to-regexp",
+        "versions",
+        "time",
+        "dist-tags",
+        "--json",
+        "--cache",
+        "/tmp/serverless-jwt-npm-cache"
+      ],
+      "selectionCutoff": "2026-11-04T18:58:10.328337+00:00"
+    },
+    {
+      "name": "minimatch",
+      "published": {
+        "11.0.4": "2026-11-02T04:50:40.232Z"
+      },
+      "command": [
+        "npm",
+        "view",
+        "minimatch",
+        "versions",
+        "time",
+        "dist-tags",
+        "--json",
+        "--cache",
+        "/tmp/serverless-jwt-npm-cache"
+      ],
+      "selectionCutoff": "2026-11-04T18:58:10.328337+00:00"
+    },
+    {
+      "name": "ajv",
+      "published": {
+        "8.20.0": "2026-04-24T15:22:16.529Z"
+      },
+      "command": [
+        "npm",
+        "view",
+        "ajv",
+        "versions",
+        "time",
+        "dist-tags",
+        "--json",
+        "--cache",
+        "/tmp/serverless-jwt-npm-cache"
+      ],
+      "selectionCutoff": "2026-11-04T18:58:10.328337+00:00"
+    },
+    {
+      "name": "smol-toml",
+      "published": {
+        "1.9.1": "2026-10-09T10:21:39.612Z"
+      },
+      "command": [
+        "npm",
+        "view",
+        "smol-toml",
+        "versions",
+        "time",
+        "dist-tags",
+        "--json",
+        "--cache",
+        "/tmp/serverless-jwt-npm-cache"
+      ],
+      "selectionCutoff": "2026-11-04T18:58:10.328337+00:00"
+    },
+    {
+      "name": "tar",
+      "published": {
+        "7.5.22": "2026-07-24T15:48:51.111Z"
+      },
+      "command": [
+        "npm",
+        "view",
+        "tar",
+        "versions",
+        "time",
+        "dist-tags",
+        "--json",
+        "--cache",
+        "/tmp/serverless-jwt-npm-cache"
+      ],
+      "selectionCutoff": "2026-11-04T18:58:10.328337+00:00"
+    },
+    {
+      "name": "js-yaml",
+      "published": {
+        "4.3.2": "2026-08-26T20:42:48.747Z"
+      },
+      "command": [
+        "npm",
+        "view",
+        "js-yaml",
+        "versions",
+        "time",
+        "dist-tags",
+        "--json",
+        "--cache",
+        "/tmp/serverless-jwt-npm-cache"
+      ],
+      "selectionCutoff": "2026-11-04T18:58:10.328337+00:00"
+    },
+    {
+      "name": "@fastify/busboy",
+      "published": {
+        "3.2.4": "2026-10-22T00:17:36.568Z"
+      },
+      "command": [
+        "npm",
+        "view",
+        "@fastify/busboy",
+        "versions",
+        "time",
+        "dist-tags",
+        "--json",
+        "--cache",
+        "/tmp/serverless-jwt-npm-cache"
+      ],
+      "selectionCutoff": "2026-11-04T18:58:10.328337+00:00"
+    },
+    {
+      "name": "zod",
+      "published": {
+        "4.6.7": "2026-10-12T16:29:37.778Z"
+      },
+      "command": [
+        "npm",
+        "view",
+        "zod",
+        "versions",
+        "time",
+        "dist-tags",
+        "--json",
+        "--cache",
+        "/tmp/serverless-jwt-npm-cache"
+      ],
+      "selectionCutoff": "2026-11-04T18:58:10.328337+00:00"
+    },
+    {
+      "name": "glob",
+      "published": {
+        "14.0.3": "2026-10-28T04:08:39.624Z"
+      },
+      "command": [
+        "npm",
+        "view",
+        "glob",
+        "versions",
+        "time",
+        "dist-tags",
+        "--json",
+        "--cache",
+        "/tmp/serverless-jwt-npm-cache"
+      ],
+      "selectionCutoff": "2026-11-04T18:58:10.328337+00:00"
+    }
+  ]
+}

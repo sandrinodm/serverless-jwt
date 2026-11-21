@@ -1,0 +1,137 @@
+packages:
+  - packages/*
+  - e2e/harness
+  - e2e/apps/*
+catalogMode: prefer
+catalog:
+  testcontainers: '12.2.1'
+  '@testcontainers/toxiproxy': '12.2.1'
+  crossws: '0.4.17'
+  '@solidjs/start': '2.2.1'
+  '@solidjs/router': '1.0.1'
+  nitropack: '2.13.6'
+  nuxt: '4.6.4'
+  fastify: '5.12.8'
+  fastify-plugin: '6.0.1'
+  '@types/aws-lambda': '8.10.164'
+  node-mocks-http: '1.18.1'
+  'srvx': '1.0.8'
+  '@tanstack/react-start': '1.169.4'
+  '@tanstack/solid-start': '1.169.4'
+  '@tanstack/start-client-core': '1.170.39'
+  '@tanstack/start-server-core': '1.169.45'
+  '@tanstack/react-router': '1.170.46'
+  '@tanstack/solid-router': '1.170.43'
+  'solid-js': '1.9.18'
+  '@vitejs/plugin-react': '6.2.1'
+  'vite-plugin-solid': '2.11.15'
+  'nitro': '3.0.261103-rc'
+  'react-router': '8.5.1'
+  '@react-router/dev': '8.5.1'
+  '@react-router/serve': '8.5.1'
+  'isbot': '5.2.2'
+  'astro': '7.4.5'
+  '@astrojs/node': '11.1.9'
+  '@astrojs/markdown-remark': '7.3.5'
+  '@types/hast': '3.0.5'
+  '@types/mdast': '4.0.4'
+  '@types/unist': '3.0.3'
+  'ioredis': '5.11.1'
+  'mongodb': '7.8.0'
+  'supports-color': '7.2.0'
+  '@sveltejs/kit': '3.1.1'
+  '@sveltejs/adapter-node': '6.0.1'
+  '@sveltejs/adapter-cloudflare': '8.0.2'
+  '@sveltejs/vite-plugin-svelte': '7.3.1'
+  'svelte': '5.57.3'
+  '@netlify/functions': '6.1.0'
+  '@netlify/edge-functions': '4.0.3'
+  'netlify-cli': '27.16.2'
+  '@vercel/functions': '3.10.6'
+  'vercel': '65.11.0'
+  'hono': '4.13.16'
+  '@hono/node-server': '2.1.6'
+  'sharp': '0.35.5'
+  'next': '16.4.5'
+  'react': '19.3.1'
+  'react-dom': '19.3.1'
+  '@types/react': '19.3.0'
+  '@types/react-dom': '19.3.0'
+  '@cloudflare/workers-types': '5.20261104.1'
+  'wrangler': '4.157.0'
+  'express': '5.3.0'
+  '@types/express': '5.0.6'
+  'oidc-provider': '9.13.3'
+  '@types/oidc-provider': '9.13.1'
+  'semver': '7.8.6'
+  'yaml': '2.9.1'
+  '@cloudflare/vitest-plugin': '1.5.1'
+  '@stryker-mutator/core': '10.1.1'
+  '@stryker-mutator/vitest-runner': '10.1.1'
+  'fast-check': '4.10.2'
+  '@stylistic/eslint-plugin': '5.10.0'
+  '@types/node': '26.6.6'
+  'jose': '6.2.15'
+  'jsdoc-lint': '0.6.0'
+  'typescript': '7.0.2'
+  'vite': 'npm:@voidzero-dev/vite-plus-core@1.5.0'
+  'vite-plus': '1.5.0'
+  '@vitest/coverage-v8': '5.1.0'
+  'publint': '0.3.25'
+  '@arethetypeswrong/cli': '0.18.5'
+  'npm': '12.2.1'
+  '@sinonjs/fake-timers': '15.4.0'
+  'undici': '8.12.3'
+overrides:
+  # GHSA-g3hv-75wg-m249: audit-gated tooling transitive; eligible fix checked 2026-11-11.
+  'minimatch@10.2.6': '11.0.4'
+  # Stryker's tooling-only qs version has four fixed denial-of-service advisories.
+  'qs@6.15.1': '6.16.1'
+  # P4 CLI advisories: exact affected versions; evidence and reassessment in docs/development.md.
+  'undici@5.28.4': '6.29.1'
+  'undici@5.29.0': '6.29.1'
+  'path-to-regexp@6.1.0': '6.3.0'
+  'path-to-regexp@8.3.0': '8.4.2'
+  'minimatch@10.1.1': '11.0.4'
+  'ajv@8.6.3': '8.20.0'
+  'smol-toml@1.5.2': '1.9.1'
+  'tar@7.5.11': '7.5.22'
+  'js-yaml@4.1.1': '4.3.2'
+  '@fastify/busboy@2.1.1': '3.2.4'
+  # Use the fixed v4 entry; /v3 retains the resource-amplification behavior.
+  'zod@3.22.4': '4.6.7'
+  'zod@4.1.11': '4.6.7'
+  'glob@13.0.6': '14.0.3'
+  # Testcontainers archive utilities use the same reviewed fixed glob sync API.
+  'glob@10.5.0': '14.0.3'
+  # Upstream 4.3.1 has no fixed release. The reviewed fork rejects prototype writes.
+  # Reassess on either consumer change; remove when eligible upstream code passes the regression.
+  '@netlify/config@25.6.1>deepmerge': 'npm:@stackline/deepmerge@1.1.0'
+  '@sveltejs/vite-plugin-svelte@7.3.1>deepmerge': 'npm:@stackline/deepmerge@1.1.0'
+  # Nuxt4/Nitro2's actual Rollup resolver is the third reviewed consumer (P5).
+  '@rollup/plugin-node-resolve@16.0.3>deepmerge': 'npm:@stackline/deepmerge@1.1.0'
+  vite@*: 'catalog:'
+peerDependencyRules:
+  allowAny: [vite]
+  allowedVersions:
+    vite: '*'
+allowBuilds:
+  esbuild: true
+  workerd: false
+  # Nitro optional SSH/database transports are unused; never run their native setup.
+  cpu-features: false
+  protobufjs: false
+  ssh2: false
+  # Optional Vercel account credential FFI is unused by isolated account-free tests.
+  koffi: false
+  # Completion setup and optional Unix datagram logging are unnecessary in isolated CLI tests.
+  netlify-cli: false
+  unix-dgram: false
+minimumReleaseAge: 10080
+minimumReleaseAgeStrict: true
+
+patchedDependencies:
+  netlify-cli@27.16.2: patches/netlify-cli@27.16.2.patch
+  '@react-router/serve@8.5.1': patches/@react-router__serve@8.5.1.patch
+  '@solidjs/router@1.0.1': patches/@solidjs__router@1.0.1.patch
+  h3@2.0.8: patches/h3@2.0.8.patch

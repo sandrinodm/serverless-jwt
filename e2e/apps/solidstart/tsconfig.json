@@ -1,0 +1,14 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "@solidjs/start/env"],
+    "isolatedDeclarations": false,
+    "skipLibCheck": false,
+    "lib": ["ES2025", "ESNext.Disposable", "ESNext.Error", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "include": ["src"]
+}

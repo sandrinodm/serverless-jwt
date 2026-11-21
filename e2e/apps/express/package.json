@@ -1,0 +1,24 @@
+{
+  "name": "@serverless-jwt-internal/express",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.json && tsc -p ../../../packages/express/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/express",
+    "prepare:peers": "pnpm --filter @serverless-jwt/express... build"
+  },
+  "dependencies": {
+    "@serverless-jwt/express": "workspace:*",
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@types/express": "catalog:",
+    "express": "catalog:"
+  },
+  "devDependencies": {
+    "@types/express": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "express": "^5"
+  }
+}

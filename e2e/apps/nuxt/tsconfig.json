@@ -1,0 +1,9 @@
+{
+  "extends": ["./.nuxt/tsconfig.server.json", "../../../tsconfig.base.json"],
+  "compilerOptions": {
+    "types": ["node"],
+    "isolatedDeclarations": false,
+    "lib": ["ES2025", "ESNext.Disposable", "WebWorker", "DOM.Iterable"]
+  },
+  "include": ["server", "nuxt.config.ts"]
+}

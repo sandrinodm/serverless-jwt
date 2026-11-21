@@ -1,35 +1,73 @@
 {
   "name": "@serverless-jwt/netlify",
-  "version": "0.2.1",
-  "description": "JWT verification for Netlify Functions",
-  "author": "Sandrino Di Mattia",
-  "homepage": "https://github.com/sandrinodimattia/serverless-jwt#readme",
+  "version": "0.0.0",
+  "description": "Bearer access-token authentication for Netlify Functions v2 and Edge.",
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "directories": {
-    "lib": "dist"
-  },
-  "files": [
-    "dist/**"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sandrinodimattia/serverless-jwt.git"
+    "url": "git+https://github.com/sandrinodm/serverless-jwt.git",
+    "directory": "packages/netlify"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./edge": {
+      "source": "./src/edge.ts",
+      "default": "./dist/edge.mjs"
+    },
+    "./v1": {
+      "source": "./src/v1.ts",
+      "default": "./dist/v1.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./edge": "./dist/edge.mjs",
+      "./v1": "./dist/v1.mjs",
+      "./package.json": "./package.json"
+    },
+    "access": "public"
   },
   "scripts": {
-    "prepublishOnly": "npm run build",
-    "prebuild": "npm run clean",
-    "build": "tsc -p tsconfig.build.json",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo && rm -rf tsconfig.build.tsbuildinfo"
-  },
-  "bugs": {
-    "url": "https://github.com/sandrinodimattia/serverless-jwt/issues"
+    "build": "vp pack",
+    "prepack": "vp pack",
+    "typecheck:lib": "tsc -p tsconfig.lib.json"
   },
   "dependencies": {
-    "@serverless-jwt/jwt-verifier": "0.2.1"
+    "@serverless-jwt/jwt-verifier": "workspace:*"
+  },
+  "devDependencies": {
+    "@netlify/edge-functions": "catalog:",
+    "@netlify/functions": "catalog:",
+    "@types/aws-lambda": "catalog:",
+    "@types/node": "catalog:"
+  },
+  "peerDependencies": {
+    "@netlify/edge-functions": "4.0.3",
+    "@netlify/functions": "6.1.0",
+    "@types/node": "26.6.6"
+  },
+  "peerDependenciesMeta": {
+    "@netlify/functions": {
+      "optional": true
+    },
+    "@netlify/edge-functions": {
+      "optional": true
+    },
+    "@types/node": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }

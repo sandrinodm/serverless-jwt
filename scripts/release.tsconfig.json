@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "skipLibCheck": false
+  },
+  "include": [
+    "release-*.ts",
+    "publish-all.ts",
+    "verify-published.ts",
+    "set-version.ts",
+    "ci-ok.ts",
+    "pr-title.ts",
+    "package-validation.ts"
+  ]
+}

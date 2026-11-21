@@ -1,0 +1,10 @@
+[build]
+command = "true"
+publish = "public"
+[functions]
+directory = "netlify/functions"
+[dev]
+framework = "#static"
+[[edge_functions]]
+function = "me"
+path = "/edge/me"

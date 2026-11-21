@@ -1,0 +1,47 @@
+{
+  "name": "@serverless-jwt/hono",
+  "version": "0.0.0",
+  "description": "Bearer access-token middleware for Hono.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandrinodm/serverless-jwt.git",
+    "directory": "packages/hono"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./package.json": "./package.json"
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "prepack": "vp pack",
+    "typecheck:lib": "tsc -p tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*"
+  },
+  "devDependencies": {
+    "hono": "catalog:"
+  },
+  "peerDependencies": {
+    "hono": "4.13.16"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

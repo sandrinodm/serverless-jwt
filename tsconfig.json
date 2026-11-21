@@ -1,18 +1,7 @@
 {
-  "extends": "./tsconfig.build.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "./packages",
-    "composite": true
+    "types": ["node"]
   },
-  "references": [
-    {
-      "path": "./packages/jwt-verifier/tsconfig.build.json"
-    },
-    {
-      "path": "./packages/netlify/tsconfig.build.json"
-    },
-    {
-      "path": "./packages/next/tsconfig.build.json"
-    }
-  ]
+  "include": ["vite.config.ts", "packages/*/vite.config.ts", "packages/*/src", "e2e/**/*.ts"]
 }

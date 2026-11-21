@@ -1,0 +1,62 @@
+{
+  "name": "@serverless-jwt/sveltekit",
+  "version": "0.0.0",
+  "description": "Bearer access-token hooks and mandatory prerender protection for SvelteKit.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandrinodm/serverless-jwt.git",
+    "directory": "packages/sveltekit"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "imports": {
+    "#serverless-jwt-policy": "./dist/policy.mjs"
+  },
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json",
+    "./build": {
+      "source": "./src/build.ts",
+      "default": "./dist/build.mjs"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./package.json": "./package.json",
+      "./build": "./dist/build.mjs"
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "prepack": "vp pack",
+    "typecheck:lib": "tsc -p tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*"
+  },
+  "devDependencies": {
+    "@sveltejs/kit": "catalog:",
+    "@types/node": "catalog:"
+  },
+  "peerDependencies": {
+    "@sveltejs/kit": "3.1.1",
+    "@types/node": "26.6.6"
+  },
+  "peerDependenciesMeta": {
+    "@types/node": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

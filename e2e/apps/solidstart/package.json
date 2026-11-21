@@ -1,0 +1,25 @@
+{
+  "name": "@serverless-jwt-internal/solidstart",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.json",
+    "build:app": "node build.mjs"
+  },
+  "dependencies": {
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@serverless-jwt/nuxt": "workspace:*",
+    "@solidjs/router": "catalog:",
+    "@solidjs/start": "catalog:",
+    "h3": "2.0.8",
+    "solid-js": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "crossws": "catalog:",
+    "nitro": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

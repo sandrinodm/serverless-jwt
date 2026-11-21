@@ -1,0 +1,44 @@
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { rollup } from 'rollup';
+import ts from 'typescript';
+import './trim.mjs';
+import { dts } from 'rollup-plugin-dts';
+const src=process.env.UNSTORAGE_SOURCE ?? './node_modules/unstorage';
+const root=readFileSync(src+'/dist/index.d.mts','utf8');
+writeFileSync('core.d.ts',readFileSync(src+'/dist/shared/unstorage.DqlWKU2I.d.mts','utf8').replace('Driver as D','Driver').replace('Storage as a','Storage'));
+const imports=[...root.matchAll(/^import (.+) from 'unstorage\/drivers\/([^']+)';$/gm)];
+mkdirSync('options',{recursive:true});
+for(const [, , name] of imports){
+ let text=readFileSync(`${src}/drivers/${name}.d.mts`,'utf8');
+ text=text.replace(/declare const _default:[\s\S]*?\nexport default _default;\n?/,'');
+ // Options-only files retain every real options dependency but exclude unused factory outputs.
+ const ast=ts.createSourceFile(name,text,ts.ScriptTarget.Latest,true);
+ const body=ast.statements.filter(n=>!ts.isImportDeclaration(n)).map(n=>n.getText(ast)).join('\n');
+ for (const stmt of [...ast.statements].reverse()) {
+   if (!ts.isImportDeclaration(stmt)) continue;
+   const clause=stmt.importClause;
+   const names=clause?.namedBindings && ts.isNamedImports(clause.namedBindings) ? clause.namedBindings.elements.map(n=>n.name.text) : clause?.name ? [clause.name.text] : [];
+   if (names.length && names.every(n=>!new RegExp('\\b'+n+'\\b').test(body))) text=text.slice(0,stmt.pos)+text.slice(stmt.end);
+ }
+ if(name==='cloudflare-kv-binding') text='import type { KVNamespace } from \"../cloudflare-input.js\";\n'+text;
+ if(name==='cloudflare-r2-binding') text='import type { R2Bucket } from \"../cloudflare-input.js\";\n'+text;
+ if(name==='deno-kv') text='import type * as Deno from \"../deno-input.js\";\n'+text;
+ if(name==='netlify-blobs') text=text.replace('from \"@netlify/blobs\"','from \"../netlify-options.js\"');
+ if(name==='uploadthing') text=text.replace('import { UTApi } from \"uploadthing/server\";', 'import type { UTApiOptions as SourceOptions } from \"../uploadthing-options.js\";').replace('Omit<Exclude<ConstructorParameters<typeof UTApi>[0], undefined>, \"defaultKeyType\">','Omit<SourceOptions, \"defaultKeyType\">');
+ if(name.startsWith('deno-kv')) text=text.replace('from \"@deno/kv\"', 'from \"../deno-api.js\"');
+ text=text.replace(/from [\"']\.\.[\"']/g, 'from \"../core.js\"');
+ writeFileSync(`options/${name}.d.ts`,text);
+}
+let input=imports.map(([,names,name])=>`import ${names} from './options/${name}.js';`).join('\n');
+input+='\n'+root.slice(root.indexOf('type BuiltinDriverName'),root.indexOf('declare const builtinDrivers'));
+input+='\nexport type { BuiltinDriverName, BuiltinDriverOptions };\n';
+writeFileSync('input.d.ts',input);
+writeFileSync('deno-api.d.ts',readFileSync('deno-api.d.ts','utf8').replace('./kv_types.js','./node_modules/@deno/kv/esm/kv_types.js').replace('import \"./_dnt.polyfills.js\";',''));
+const bundle=await rollup({input:'input.d.ts',external:(id)=>id.startsWith('node:')||['mongodb','ioredis','lru-cache'].includes(id),plugins:[dts({respectExternal:true,compilerOptions:{skipLibCheck:false,types:[]}})]});
+const output=await bundle.generate({format:'es'});
+const text=output.output[0].code;
+const parsed=ts.createSourceFile('options-bundle.d.ts',text,ts.ScriptTarget.Latest,true);
+const externalImports=parsed.statements.filter(ts.isImportDeclaration).map(n=>n.moduleSpecifier.text);
+for(const dependency of externalImports) if(!['node:fs','mongodb','ioredis','lru-cache'].includes(dependency)) throw new Error('Unexpected external dependency: '+dependency);
+writeFileSync('options-bundle.d.ts',text);
+writeFileSync('output-imports.json',JSON.stringify(externalImports,null,2)+'\n');

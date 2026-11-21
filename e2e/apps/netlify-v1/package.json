@@ -1,0 +1,23 @@
+{
+  "name": "@serverless-jwt-internal/netlify-v1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:types": "tsc -p tsconfig.json && tsc -p ../../../packages/netlify/tsconfig.types.json",
+    "test:conformance": "pnpm --dir ../../.. exec vp test run --project @serverless-jwt/netlify",
+    "prepare:peers": "pnpm --filter @serverless-jwt/netlify... build"
+  },
+  "dependencies": {
+    "@netlify/functions": "catalog:",
+    "@serverless-jwt/jwt-verifier": "workspace:*",
+    "@serverless-jwt/netlify": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "@netlify/functions": "6.1.0"
+  }
+}
